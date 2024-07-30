@@ -5,7 +5,11 @@
    - **Git**
 
 2. **Create a Local Folder:**
-   - Name it: `sweng-455-project`
+   - Name it: Anything you'd like
+   - Create a React app using `create-react-app`:
+     ```bash
+     npx create-react-app sweng-455-project
+     ```
 
 3. **Setup Backend:**
    - Navigate to the `backend` folder:
