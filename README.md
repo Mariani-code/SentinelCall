@@ -1,6 +1,8 @@
 -need Node.js and npm installed
 -Git installed
 
+Make folder on local called: sweng-455-project
+
 cd backend
 npm install
 
@@ -14,5 +16,6 @@ password: admin
 
 
 to start front end :
-cd SentinelCall
+cd sweng-455-project 
 npm start 
+
