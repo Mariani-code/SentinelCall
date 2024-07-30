@@ -6,10 +6,9 @@
 
 2. **Create a Local Folder:**
    - Name it: Anything you'd like
-   - Create a React app using `create-react-app`:
-     ```bash
-     npx create-react-app sweng-455-project
-     ```
+   - git clone the repo
+  
+**STARTING APP**
 
 3. **Setup Backend:**
    - Navigate to the `backend` folder:
@@ -20,7 +19,7 @@
      ```bash
      npm install
      ```
-   - Start the backend server:
+   - Start the backend server,you may need to adjust the port the backend is listening on depending on your local setup:
      ```bash
      node index.js
      ```
@@ -33,6 +32,10 @@
    - Navigate back to the project folder:
      ```bash
      cd sweng-455-project
+     ```
+   - Install dependencies:
+     ```bash
+     npm install
      ```
    - Start the frontend server:
      ```bash
