@@ -1,21 +1,36 @@
--need Node.js and npm installed
--Git installed
+**Setup Instructions:**
 
-Make folder on local called: sweng-455-project
+1. **Install Required Software:**
+   - **Node.js** and **npm**
+   - **Git**
 
-cd backend
-npm install
+2. **Create a Local Folder:**
+   - Name it: `sweng-455-project`
 
-start the backend server for logging in: 
-node index.js
+3. **Setup Backend:**
+   - Navigate to the `backend` folder:
+     ```bash
+     cd backend
+     ```
+   - Install dependencies:
+     ```bash
+     npm install
+     ```
+   - Start the backend server:
+     ```bash
+     node index.js
+     ```
 
-the username and password we have currently is 
+   **Credentials:**
+   - **Username:** `admin`
+   - **Password:** `admin`
 
-username: admin
-password: admin
-
-
-to start front end :
-cd sweng-455-project 
-npm start 
-
+4. **Start Frontend:**
+   - Navigate back to the project folder:
+     ```bash
+     cd sweng-455-project
+     ```
+   - Start the frontend server:
+     ```bash
+     npm start
+     ```
