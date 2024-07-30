@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const port = 5000;
+const port = 1000;
 
 // Middleware
 app.use(bodyParser.json());
@@ -15,6 +15,11 @@ const users = [
   { username: 'admin', password: 'admin' },
   { username: 'user2', password: 'password2' }
 ];
+
+// Root route to display server running message
+app.get('/', (req, res) => {
+  res.send('Your server is running');
+});
 
 // Login route
 app.post('/login', (req, res) => {
