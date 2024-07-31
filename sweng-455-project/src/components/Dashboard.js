@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -7,17 +8,17 @@ function Dashboard() {
       <nav className="navbar">
         <h1>PennStateSoft MSS</h1>
         <div className="nav-links">
-          <a href="#profile">Profile</a>
-          <a href="#logout">Logout</a>
+          <Link to="/profile">Profile</Link>
+          <Link to="/logout">Logout</Link>
         </div>
       </nav>
       <div className="dashboard-content">
         <aside className="sidebar">
           <ul>
-            <li><a href="#meetings">Meetings</a></li>
-            <li><a href="#rooms">Rooms</a></li>
-            <li><a href="#complaints">Complaints</a></li>
-            <li><a href="#admin">Admin</a></li>
+            <li><Link to="/meetings">My Meetings</Link></li>
+            <li><Link to="/rooms">Rooms</Link></li>
+            <li><Link to="/complaints">Complaints</Link></li>
+            <li><Link to="/admin">Admin</Link></li>
           </ul>
         </aside>
         <main className="main-content">
