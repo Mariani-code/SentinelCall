@@ -1,52 +1,107 @@
 .dashboard-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  
-  .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: #004b87;
-    color: white;
-  }
-  
-  .nav-links a {
-    color: white;
-    margin-left: 1rem;
-    text-decoration: none;
-  }
-  
-  .dashboard-content {
-    display: flex;
-    flex: 1;
-  }
-  
-  .sidebar {
-    width: 200px;
-    background-color: #f4f4f4;
-    padding: 1rem;
-  }
-  
-  .sidebar ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .sidebar ul li {
-    margin: 1rem 0;
-  }
-  
-  .sidebar ul li a {
-    text-decoration: none;
-    color: #333;
-  }
-  
-  .main-content {
-    flex: 1;
-    padding: 1rem;
-    background-color: #fff;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #007bff;
+  color: white;
+  border-bottom: 1px solid #0056b3;
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.nav-links a {
+  color: white;
+  margin-left: 1.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #e3e3e3;
+}
+
+.dashboard-content {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: #f4f4f9;
+  padding: 1.5rem;
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  margin: 0.8rem 0;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.sidebar ul li a:hover {
+  color: #0056b3;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.widgets {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.widget {
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.widget:hover {
+  background-color: #f1f1f1;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.widget h3 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.widget p {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
