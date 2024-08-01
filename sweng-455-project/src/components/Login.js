@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 import './Login.css';
 
 function Login() {
@@ -30,7 +31,11 @@ function Login() {
 
   return (
     <div className="login-container">
-      <h1>PennStateSoft Login</h1>
+      <div className="welcome-container">
+        <img src={logo} alt="SentinelCall Logo" className="logo" />
+        <h1>Welcome to SentinelCall</h1>
+        <p>Your trusted meeting scheduling system.</p>
+      </div>
       <div className="login-form">
         <input
           type="text"
@@ -45,8 +50,8 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <button onClick={handleLogin}>Login</button>
+        {message && <p className={message.startsWith('Error') ? 'error-message' : 'success-message'}>{message}</p>}
       </div>
-      {message && <p>{message}</p>}
     </div>
   );
 }
