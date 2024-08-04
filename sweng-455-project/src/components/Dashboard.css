@@ -22,6 +22,30 @@
   color: white;
 }
 
+/* Dashboard.css */
+.create-meeting-button {
+  padding: 12px;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 20px;
+}
+
+.create-meeting-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.create-meeting-button:active {
+  background-color: #004494;
+  transform: translateY(0);
+}
+
+
 .nav-links a {
   color: white;
   margin-left: 1.5rem;
