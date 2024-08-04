@@ -1,0 +1,116 @@
+/* Meeting Form Container */
+.meeting-form-container {
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    margin: auto;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Form Heading */
+  .meeting-form-container h2 {
+    color: #002d72;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Form Elements */
+  .meeting-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* Form Labels */
+  .meeting-form label {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  
+  /* Form Inputs */
+  .meeting-form input,
+  .meeting-form select {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* MeetingForm.css */
+/* Add this CSS to style the Back to Dashboard button */
+.back-to-dashboard-button {
+    padding: 12px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
+  }
+  
+  .back-to-dashboard-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  .back-to-dashboard-button:active {
+    background-color: #004494;
+    transform: translateY(0);
+  }
+  
+  
+  .meeting-form input:focus,
+  .meeting-form select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+  }
+  
+  /* Submit Button */
+  .meeting-form button {
+    padding: 12px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .meeting-form button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  .meeting-form button:active {
+    background-color: #004494;
+    transform: translateY(0);
+  }
+  
+  /* Message Styles */
+  .error-message,
+  .success-message {
+    font-size: 16px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .error-message {
+    color: #ff4d4d;
+    background-color: #ffe5e5;
+  }
+  
+  .success-message {
+    color: #4caf50;
+    background-color: #e5ffe5;
+  }
+  

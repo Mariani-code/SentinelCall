@@ -22,6 +22,7 @@ function Sidebar() {
         <li><Link to="/rooms">Rooms</Link></li>
         <li><Link to="/complaints">Complaints</Link></li>
         <li><Link to="/admin">Admin</Link></li>
+        <li><Link to="/create-meeting">Create Meeting</Link></li>
       </ul>
     </aside>
   );
@@ -45,6 +46,9 @@ function Dashboard() {
         <main className="main-content">
           <h2>Welcome to the Meeting Scheduling System</h2>
           <p>Select an option from the sidebar to get started.</p>
+          <button className="create-meeting-button" onClick={() => window.location.href = '/create-meeting'}>
+            Create a Meeting
+          </button>
           <div className="widgets">
             <Widget 
               title="Today's Meetings" 
