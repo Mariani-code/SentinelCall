@@ -6,9 +6,8 @@ import { useEffect, useState } from 'react';
 export function Sidebar() {
 
     const [showText, setShowText] = useState(false);
-
-    const isAdmin = async () => {
-        const token = localStorage.getItem('token');
+    
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         fetch('http://localhost:1000/checkRole', {
