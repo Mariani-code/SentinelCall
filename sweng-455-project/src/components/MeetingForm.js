@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import './MeetingForm.css';
 
 function MeetingForm() {
@@ -8,30 +8,42 @@ function MeetingForm() {
   const [room, setRoom] = useState('');
   const [participants, setParticipants] = useState([]);
   const [message, setMessage] = useState('');
-  const [showBackButton, setShowBackButton] = useState(false); // State to control button visibility
+  const [showBackButton, setShowBackButton] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isUpdateMode = id !== undefined;
 
-  const handleSubmit = async (event) => {
+  useEffect(() => {
+    if (isUpdateMode) {
+      fetch(`http://localhost:1000/meetings/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          setName(data.name);
+          setTime(data.time);
+          setRoom(data.room);
+          setParticipants(data.participants.join(','));
+        })
+        .catch(err => setMessage('Error: ' + err.message));
+    }
+  }, [id, isUpdateMode]);
+
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
+    const payload = JSON.stringify({ name, time, room, participants: participants.split(',') });
+    const method = isUpdateMode ? 'PUT' : 'POST';
+    const endpoint = `http://localhost:1000/meetings${isUpdateMode ? `/${id}` : ''}`;
 
     try {
-      const response = await fetch('http://localhost:1000/meetings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name, time, room, participants })
+      const response = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
       });
 
       const data = await response.json();
       if (response.ok) {
-        setMessage('Meeting created successfully');
-        setShowBackButton(true); // Show the back button on success
-        // Optionally, reset form fields if needed
-        setName('');
-        setTime('');
-        setRoom('');
-        setParticipants([]);
+        setMessage(isUpdateMode ? 'Meeting updated successfully' : 'Meeting created successfully');
+        setShowBackButton(true);
       } else {
         setMessage(data.message);
       }
@@ -41,13 +53,13 @@ function MeetingForm() {
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard'); // Navigate to the dashboard
+    navigate('/dashboard');
   };
 
   return (
     <div className="meeting-form-container">
-      <h2>Create a Meeting</h2>
-      <form onSubmit={handleSubmit}>
+      <h2>{isUpdateMode ? 'Edit Meeting' : 'Create a Meeting'}</h2>
+      <form onSubmit={handleFormSubmit}>
         <input
           type="text"
           placeholder="Meeting Name"
@@ -69,9 +81,9 @@ function MeetingForm() {
           type="text"
           placeholder="Participants (Separated by Comma)"
           value={participants}
-          onChange={(e) => setParticipants(e.target.value.split(','))}
+          onChange={(e) => setParticipants(e.target.value)}
         />
-        <button type="submit">Create Meeting</button>
+        <button type="submit">{isUpdateMode ? 'Update Meeting' : 'Create Meeting'}</button>
         {message && (
           <>
             <p className={message.startsWith('Error') ? 'error-message' : 'success-message'}>

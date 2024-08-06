@@ -1,43 +1,86 @@
 .meetings-container {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    margin: auto;
-  }
-  
-  .meetings-container h2 {
-    color: #004b87;
-    margin-bottom: 20px;
-  }
-  
-  .error-message {
-    color: #ff4d4d;
-    font-weight: bold;
-  }
-  
-  .meetings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .meeting-card {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .meeting-name {
-    font-size: 18px;
-    color: #333;
-  }
-  
-  .meeting-time, .meeting-room {
-    font-size: 16px;
-    color: #666;
-  }
-  
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: auto;
+}
+
+.meetings-container h2 {
+  color: #004b87;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-weight: bold;
+}
+
+.meetings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.manage-participants-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: 10px;
+}
+
+.add-participants-button {
+  background-color: #007bff; /* Blue */
+  color: white;
+}
+
+.add-participants-button:hover {
+  background-color: #0056b3; /* Darker Blue */
+  transform: scale(1.05);
+}
+
+.remove-participants-button {
+  background-color: #dc3545; /* Red */
+  color: white;
+}
+
+.remove-participants-button:hover {
+  background-color: #c82333; /* Darker Red */
+  transform: scale(1.05);
+}
+
+.participants-list {
+  padding: 0;
+  list-style-type: none;
+  margin-top: 10px;
+}
+
+.participants-list li {
+  background-color: #f0f0f0;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+.meeting-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.meeting-name {
+  font-size: 18px;
+  color: #333;
+}
+
+.meeting-time, .meeting-room {
+  font-size: 16px;
+  color: #666;
+}
