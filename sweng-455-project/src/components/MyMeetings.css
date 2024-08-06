@@ -3,8 +3,8 @@
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
     margin: auto;
+    overflow-y: auto;
   }
   
   .meetings-container h2 {
@@ -40,4 +40,3 @@
     font-size: 16px;
     color: #666;
   }
-  
