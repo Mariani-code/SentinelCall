@@ -6,22 +6,6 @@
   color: #333;
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #007bff;
-  color: white;
-  border-bottom: 1px solid #0056b3;
-}
-
-.navbar h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: white;
-}
-
 /* Dashboard.css */
 .create-meeting-button {
   padding: 12px;
@@ -45,51 +29,9 @@
   transform: translateY(0);
 }
 
-
-.nav-links a {
-  color: white;
-  margin-left: 1.5rem;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.nav-links a:hover {
-  color: #e3e3e3;
-}
-
 .dashboard-content {
   display: flex;
   flex: 1;
-}
-
-.sidebar {
-  width: 220px;
-  background-color: #f4f4f9;
-  padding: 1.5rem;
-  border-right: 1px solid #ddd;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar ul li {
-  margin: 0.8rem 0;
-}
-
-.sidebar ul li a {
-  text-decoration: none;
-  color: #007bff;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.sidebar ul li a:hover {
-  color: #0056b3;
 }
 
 .main-content {

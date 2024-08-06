@@ -1,32 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
-function Navbar() {
-  return (
-    <nav className="navbar">
-      <h1>SentinelCall</h1>
-      <div className="nav-links">
-        <Link to="/profile">Profile</Link>
-        <Link to="/logout">Logout</Link>
-      </div>
-    </nav>
-  );
-}
-
-function Sidebar() {
-  return (
-    <aside className="sidebar">
-      <ul>
-        <li><Link to="/meetings">My Meetings</Link></li>
-        <li><Link to="/rooms">Rooms</Link></li>
-        <li><Link to="/complaints">Complaints</Link></li>
-        <li><Link to="/admin">Admin</Link></li>
-        <li><Link to="/create-meeting">Create Meeting</Link></li>
-      </ul>
-    </aside>
-  );
-}
+import { Navbar } from './Navbar.js';
+import { Sidebar } from './Sidebar.js';
 
 function Widget({ title, content }) {
   return (
