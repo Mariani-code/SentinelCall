@@ -70,6 +70,37 @@ app.post('/login', (req, res) => {
     }
 });
 
+app.post('/checkAuth', (req, res) => {
+    console.log("CHECK AUTH POSTED");
+
+    const token = req.headers.authorization.split(' ')[1];
+    if (token == null) return res.status(401).json({ message: 'Unauthorized' });
+
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        console.log(decoded.username);
+
+        if (decoded.username == "admin") {
+            return res.status(200).json();
+        }
+        else {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+    }
+    catch (error) {
+        console.log('Error: ' + error.message);
+    }
+});
+
+app.post('/logout', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    console.log(token);
+
+    //TODO add token to blacklist (or have some other way to invalidate it)
+    res.status(200).json();
+})
 
 /*
     Checks role of the user

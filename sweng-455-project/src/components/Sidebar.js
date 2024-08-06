@@ -6,14 +6,16 @@ import { useEffect, useState } from 'react';
 export function Sidebar() {
 
     const [showText, setShowText] = useState(false);
-    const token = localStorage.getItem('token');
+
+    const isAdmin = async () => {
+        const token = localStorage.getItem('token');
 
     useEffect(() => {
         fetch('http://localhost:1000/checkRole', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
         })
         .then(response => {
             if (response.ok) {
@@ -23,7 +25,7 @@ export function Sidebar() {
                 setShowText(false);
             }
         });
-        
+
     },[token]);
 
     return (
