@@ -31,17 +31,17 @@ body {
   margin-bottom: 20px;
 }
 
-h1 {
-  color: #333;
-  font-size: 2em;
-  margin-bottom: 10px;
+.welcome-container h1 {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 10px;
 }
 
-p {
-  color: #666;
+.welcome-container p {
+    color: #666;
 }
 
-span {
+.welcome-container span {
     font-size: 1.5em;
     padding: 10px;
 }
