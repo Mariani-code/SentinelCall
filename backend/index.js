@@ -9,8 +9,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const users = [
-  { username: 'admin', password: 'admin' },
-  { username: 'user2', password: 'password2' }
+  { username: 'admin', password: 'admin', email: 'admin@company.xyz' },
+  { username: 'user2', password: 'password2', email: 'user2@company.xyz' }
 ];
 
 let rooms = [
@@ -77,6 +77,19 @@ app.post('/login', (req, res) => {
   } else {
     res.status(401).json({ message: 'Invalid username or password' });
   }
+});
+
+app.post('/createAccount', (req, res) => {
+    const { username, password, email } = req.body;
+
+    const newUser = {
+        username: username,
+        password: password,
+        email: email
+    };
+
+    users.push(newUser);
+    res.status(201).json({message: 'Account created successfully'});
 });
 
 app.put('/meetings/:id', (req, res) => {
