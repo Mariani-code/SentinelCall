@@ -1,59 +1,53 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import logo from '../assets/logo.png';
 import './Login.css';
 
+import { useState } from 'react';
+
+import Loginform from './Loginform.js';
+import Registerform from './Registerform.js';
+
 function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:1000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setMessage('Login successful');
-        localStorage.setItem('token', data.token); // Store token
-        navigate('/dashboard'); // Navigate to dashboard
-      } else {
-        setMessage(data.message);
-      }
-    } catch (error) {
-      setMessage('Error: ' + error.message);
-    }
-  };
+    const [loginState, setLoginState] = useState(true);
+    const [loginText, setLoginText] = useState('#0000f0');
+    const [registerText, setRegisterText] = useState('black');
+    
+    const handleChange = () => {
+        setLoginState(!loginState);
+        if (loginState) {
+            setLoginText(loginText === 'black' ? '#0000f0' : 'black');
+            setRegisterText(registerText === '#0000f0' ? 'black' : '#0000f0');
+        }
+        else {
+            setLoginText(loginText === '#0000f0' ? 'black' : '#0000f0');
+            setRegisterText(registerText === 'black' ? '#0000f0' : 'black');
+        }
+    };
 
-  return (
-    <div className="login-container">
-      <div className="welcome-container">
-        <img src={logo} alt="SentinelCall Logo" className="logo" />
-        <h1>Welcome to SentinelCall</h1>
-        <p>Your trusted meeting scheduling system.</p>
-      </div>
-      <div className="login-form">
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin}>Login</button>
-        {message && <p className={message.startsWith('Error') ? 'error-message' : 'success-message'}>{message}</p>}
-      </div>
-    </div>
-  );
+
+    return (
+        <div className="login-container">
+            <div className="welcome-container">
+                <img src={logo} alt="SentinelCall Logo" className="logo" />
+                <h1>Welcome to SentinelCall</h1>
+                <p>Your trusted meeting scheduling system.</p>
+                <br></br>
+                <div className="login-switch">
+                    <span style={{color: loginText} }>Login</span>
+                    <label className="switch">
+                        <input type="checkbox" checked={!loginState} onChange={handleChange} />
+                        <span className="slider round"></span>
+                    </label>
+                    <span style={{ color: registerText }}>Register</span>
+                </div>
+            </div>
+            <div className="form-container">
+                {loginState && <Loginform />}
+                {!loginState && <Registerform />}
+            </div>
+        </div>
+    );
 }
 
 export default Login;

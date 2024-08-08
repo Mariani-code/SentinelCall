@@ -1,0 +1,59 @@
+body {
+    background: linear-gradient(to right, #f4f4f9, #5796ed);
+    overflow-x: hidden;
+}
+
+.profile-container {
+    font-family: 'Segoe UI', Tahoma, Verdana, Geneva, Tahoma, sans-serif, Verdana, sans-serif;
+    background: #FFF;
+    margin: 0 auto;
+    position: relative;
+    margin-top: 10%;
+    box-shadow: 2px 5px 20px rgba(0,0,0, 0.5);
+    width: 50rem;
+    height: 37rem;
+}
+
+.leftbox {
+    float: left;
+    top: -5%;
+    left: 5%;
+    position: absolute;
+    width: 15%;
+    height: 110%;
+    background: #28b3f1;
+    box-shadow: 2px 3px 10px rgba(0,0,0, 0.5);
+    border: .1em solid #fff;
+}
+
+.rightbox {
+    width: 60%;
+    margin-left: 27%;
+}
+
+.profile-container nav button {
+    background: none;
+    border: none;
+    list-style: none;
+    padding-left: 20%;
+    margin-top: 12rem;
+    margin-bottom: 10em;
+    color: #fff;
+    font-size: 1.1em;
+    display: block;
+    transition: all .3s ease-in-out;
+}
+
+    .profile-container nav button:first-child {
+        margin-top: 12.5rem;
+    }
+
+    .profile-container nav button:hover {
+        color: #3034ee;
+        cursor: pointer;
+        transform: scale(1.2);
+    }
+
+.nav-button.active {
+    color: #3034ee;
+}
