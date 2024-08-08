@@ -41,11 +41,31 @@ const isDoubleBooked = (participant, startTime, endTime) => {
 app.post('/grabInfo', (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
 
-    if (token != null) {
+    if (token === null) {
         return res.status(400).json({ message: 'Please login to view account information' });
     }
 
-    return res.status(400).json({ message: 'Nothing to grab yet' });
+    console.log(token);
+
+    const decode = jwt.verify(token, 'your_jwt_secret');
+    var user = null;
+    var userI = null;
+
+    for (let i = 0; i < users.length; i++) {
+        if (decode.username === users[i].username) {
+            user = users[i];
+            userI = userInfo[i];
+        }
+    }
+
+    if (user === null) {
+        return res.status(400).json({ message: 'Please login to view account information' });
+    }
+
+    console.log(user);
+    console.log(userI);
+
+    return res.status(200).json({user, userI});
 });
 
 app.post('/rooms', (req, res) => {
@@ -107,17 +127,15 @@ app.post('/login', (req, res) => {
 */
 app.post('/checkRole', (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
-    if (token == null) return res.status(401).json({ message: 'Unauthorized' });
+    if (token === null) return res.status(401).json({ message: 'Unauthorized' });
 
     try {
         const decoded = jwt.verify(token, 'your_jwt_secret');
 
         if (decoded.username == "admin") {
-            console.log("GOOD");
             return res.status(200).json();
         }
         else {
-            console.log("BAD");
             return res.status(401).json({ message: 'Unauthorized' });
         }
     }

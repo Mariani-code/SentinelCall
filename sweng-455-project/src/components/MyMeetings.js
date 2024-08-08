@@ -133,39 +133,41 @@ function MyMeetings() {
     };
 
     return (
-        <div className='main-container'>
+        <div className='nav-container'>
             <Navbar />
-            <Sidebar />
-            <div className="meetings-container">
-                <h2>My Meetings</h2>
-                {error && <p className="error-message">{error}</p>}
-                <div className="meetings-list">
-                    {meetings.length > 0 ? (
-                        meetings.map(meeting => (
-                            <div key={meeting.id} className="meeting-card">
-                                <h3 className="meeting-name">{meeting.name}</h3>
-                                <p className="meeting-time">{new Date(meeting.time).toLocaleString()}</p>
-                                <p className="meeting-room">Room {meeting.room}</p>
-                                {meeting.participants && meeting.participants.length > 0 ? (
-                                    <ul className="participants-list">
-                                        {meeting.participants.map((participant, index) => (
-                                            <li key={participant}>{participant}</li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No participants</p>
-                                )}
-                                <button onClick={() => handleAddParticipants(meeting.id)} className="manage-participants-button add-participants-button">
-                                    Add Participants
-                                </button>
-                                <button onClick={() => handleRemoveParticipants(meeting.id)} className="manage-participants-button remove-participants-button">
-                                    Remove Participants
-                                </button>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No meetings available.</p>
-                    )}
+            <div className='nav-content'>
+                <Sidebar />
+                <div className="meetings-container">
+                    <h2>My Meetings</h2>
+                    {error && <p className="error-message">{error}</p>}
+                    <div className="meetings-list">
+                        {meetings.length > 0 ? (
+                            meetings.map(meeting => (
+                                <div key={meeting.id} className="meeting-card">
+                                    <h3 className="meeting-name">{meeting.name}</h3>
+                                    <p className="meeting-time">{new Date(meeting.time).toLocaleString()}</p>
+                                    <p className="meeting-room">Room {meeting.room}</p>
+                                    {meeting.participants && meeting.participants.length > 0 ? (
+                                        <ul className="participants-list">
+                                            {meeting.participants.map((participant, index) => (
+                                                <li key={participant}>{participant}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No participants</p>
+                                    )}
+                                    <button onClick={() => handleAddParticipants(meeting.id)} className="manage-participants-button add-participants-button">
+                                        Add Participants
+                                    </button>
+                                    <button onClick={() => handleRemoveParticipants(meeting.id)} className="manage-participants-button remove-participants-button">
+                                        Remove Participants
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No meetings available.</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

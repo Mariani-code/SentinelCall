@@ -6,14 +6,16 @@ import './Complaints.css';
 function Complaints() {
 
     return (
-        <div className='main-container'>
+        <div className='nav-container'>
             <Navbar />
-            <Sidebar />
-            <div className="complaints-container">
-                <h2> Complaints </h2>
-                <p>
-                    There should be complaints here.
-                </p>
+            <div className='nav-content'>
+                <Sidebar />
+                <div className="complaints-container">
+                    <h2> Complaints </h2>
+                    <p>
+                        There should be complaints here.
+                    </p>
+                </div>
             </div>
         </div>
     );
