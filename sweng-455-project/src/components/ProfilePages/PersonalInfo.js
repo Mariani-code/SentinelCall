@@ -1,7 +1,7 @@
 
 import './SharedProfile.css';
 
-import { useState, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 function PersonalInfo() {
 
@@ -13,9 +13,9 @@ function PersonalInfo() {
     const [message, setMessage] = useState('');
 
     const grabUserInfo = async () => {
-        const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:1000/grabInfo', {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:1000/grabAccountInfo', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer: ${token}`
@@ -23,11 +23,11 @@ function PersonalInfo() {
             });
             const data = await response.json();
             if (response.ok) {
-                setFirstName(data.firstName);
-                setLastName(data.lastName);
-                setUsername(data.username);
-                setPassword(data.password);
-                setEmail(data.email);
+                setFirstName(data.userI.firstName);
+                setLastName(data.userI.lastName);
+                setUsername(data.user.username);
+                setPassword(data.user.password);
+                setEmail(data.user.email);
             }
             else {
                 setMessage(data.message);
@@ -37,7 +37,7 @@ function PersonalInfo() {
         }
     }
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         grabUserInfo();
     }, []);
 
@@ -50,9 +50,9 @@ function PersonalInfo() {
             <h2>
                 First Name
             </h2>
-            <input 
+            <input
                 type="text"
-                value={ firstName }
+                value={firstName}
             />
             <h2>
                 Last Name
@@ -72,8 +72,15 @@ function PersonalInfo() {
                 Password
             </h2>
             <input
-                type="text"
+                type="password"
                 value={password}
+            />
+            <h2>
+                Confirm Password
+            </h2>
+            <input
+                type="password"
+                value=''
             />
             <h2>
                 Email

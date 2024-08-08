@@ -3,10 +3,11 @@
     background: #FFF;
     margin: 0 auto;
     position: relative;
-    margin-top: 5%;
+    margin-top: 3%;
+    margin-left: 20%;
     box-shadow: 2px 5px 20px rgba(0,0,0, 0.5);
-    width: 50rem;
-    height: 37rem;
+    width: 42%;
+    height: 80%;
 }
 
 .leftbox {
