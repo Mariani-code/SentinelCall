@@ -1,14 +1,9 @@
-body {
-    background: linear-gradient(to right, #f4f4f9, #5796ed);
-    overflow-x: hidden;
-}
-
 .profile-container {
     font-family: 'Segoe UI', Tahoma, Verdana, Geneva, Tahoma, sans-serif, Verdana, sans-serif;
     background: #FFF;
     margin: 0 auto;
     position: relative;
-    margin-top: 10%;
+    margin-top: 5%;
     box-shadow: 2px 5px 20px rgba(0,0,0, 0.5);
     width: 50rem;
     height: 37rem;
