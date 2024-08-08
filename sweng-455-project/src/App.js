@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import MyMeetings from './components/MyMeetings';
 import Rooms from './components/Rooms';
+import Complaints from './components/Complaints';
 import MeetingForm from './components/MeetingForm'; // Import new component
 import Profile from './components/Profile';
 
@@ -19,6 +20,7 @@ function App() {
                     <Route path="/create-meeting" element={<MeetingForm />} /> {/* Add route */}
                     <Route path="/" element={<Login />} />
                     <Route path="/profile" element={<Profile /> } />
+                      <Route path="/complaints" element={<Complaints />} />
                 </Routes>
             </div>
         </Router>

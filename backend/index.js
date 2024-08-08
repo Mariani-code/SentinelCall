@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -65,6 +66,7 @@ app.post('/meetings', (req, res) => {
     const startTime = new Date(time);
     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
 
+    // Check if any participant is double-booked
     const doubleBooked = participants.some(participant => isDoubleBooked(participant, startTime, endTime));
 
     if (doubleBooked) {
@@ -85,13 +87,51 @@ app.post('/meetings', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
+
+    // Dummy authentication check
     const user = users.find(user => user.username === username && user.password === password);
 
     if (user) {
-        res.json({ message: 'Login successful', user });
+        // Generate a token or send a success response
+        const token = jwt.sign({ username }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.json({ token });
     } else {
         res.status(401).json({ message: 'Invalid username or password' });
     }
+});
+
+/*
+    Checks role of the user
+    Admin - Mange room, manage account, view complaints
+    Client - Create meeting, create complaint, veiw meetings
+*/
+app.post('/checkRole', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    if (token == null) return res.status(401).json({ message: 'Unauthorized' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.username == "admin") {
+            console.log("GOOD");
+            return res.status(200).json();
+        }
+        else {
+            console.log("BAD");
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+    }
+    catch (error) {
+        console.log('Error: ' + error.message);
+    }
+});
+
+app.post('/logout', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    console.log(token);
+
+    //TODO add token to blacklist (or have some other way to invalidate it)
+    res.status(200).json();
 });
 
 app.post('/createAccount', (req, res) => {

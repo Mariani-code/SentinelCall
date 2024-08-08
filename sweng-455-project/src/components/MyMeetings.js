@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './MyMeetings.css';
 
+import { Sidebar } from './Sidebar.js';
+import { Navbar } from './Navbar.js';
+
 function MyMeetings() {
-  const [meetings, setMeetings] = useState([]);
-  const [error, setError] = useState('');
+    const [meetings, setMeetings] = useState([]);
+    const [error, setError] = useState('');
 
   // Function to fetch meetings from the server
   const fetchMeetings = async () => {
@@ -130,6 +133,9 @@ function MyMeetings() {
   };
 
   return (
+    <div className='main-container'>
+            <Navbar />
+            <Sidebar />
     <div className="meetings-container">
       <h2>My Meetings</h2>
       {error && <p className="error-message">{error}</p>}
@@ -156,13 +162,9 @@ function MyMeetings() {
               Remove Participants
             </button>
             </div>
-          ))
-        ) : (
-          <p>No meetings scheduled.</p>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+</div>
+    );
 }
 
 export default MyMeetings;

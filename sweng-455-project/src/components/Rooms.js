@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './Rooms.css';
 
+import './Navbar.css';
+import './Sidebar.css';
+
+import { Navbar } from './Navbar.js';
+import { Sidebar } from './Sidebar.js';
+
 function Rooms() {
+  
   const [rooms, setRooms] = useState([]);
   const [error, setError] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -47,6 +54,9 @@ function Rooms() {
   }, []);
 
   return (
+    <div className="main-container">
+            <Navbar />
+            <Sidebar />
     <div className="rooms-container">
       <h2>Meeting Rooms</h2>
       {error && <p className="error-message">{error}</p>}
@@ -56,8 +66,7 @@ function Rooms() {
             <div
               key={room.id}
               className={`room-card ${selectedRoom === room.id ? 'selected' : ''}`}
-              onClick={() => setSelectedRoom(room.id)}
-            >
+              onClick={() => setSelectedRoom(room.id)}>
               <h3 className="room-number">Room {room.number}</h3>
               <p className="room-description">{room.description}</p>
               <p className="room-capacity">Capacity: {room.capacity}</p>
@@ -74,15 +83,6 @@ function Rooms() {
                 )}
               </p>
             </div>
-          ))
-        ) : (
-          <p>No rooms available.</p>
-        )}
-      </div>
-      {selectedRoom && (
-        <div className="room-details">
-          <h3>Room Details</h3>
-          {/* Fetch and display room details if necessary */}
         </div>
       )}
       <div className="add-room">
@@ -112,6 +112,7 @@ function Rooms() {
           <button type="submit">Add Room</button>
         </form>
       </div>
+    </div>
     </div>
   );
 }
