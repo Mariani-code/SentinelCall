@@ -12,19 +12,21 @@ function Profile() {
     const [activeButton, setActiveButton] = useState(0);
 
     return (
-        <div className='main-container'>
+        <div className='nav-container'>
             <Navbar />
-            <Sidebar />
-            <div className="profile-container">
-                <div className="leftbox">
-                    <nav>
-                        <button className={`nav-button ${activeButton === 0 ? 'active' : ''}`} onClick={() => setActiveButton(0)}>Account</button>
-                        <button className={`nav-button ${activeButton === 1 ? 'active' : ''}`} onClick={() => setActiveButton(1)}>Billing</button>
-                    </nav>
-                </div>
-                <div className="rightbox">
-                    {activeButton === 0 && <PersonalInfo />}
-                    {activeButton === 1 && <BillingInfo />}
+            <div className='nav-content'>
+                <Sidebar />
+                <div className="profile-container">
+                    <div className="leftbox">
+                        <nav>
+                            <button className={`nav-button ${activeButton === 0 ? 'active' : ''}`} onClick={() => setActiveButton(0)}>Account</button>
+                            <button className={`nav-button ${activeButton === 1 ? 'active' : ''}`} onClick={() => setActiveButton(1)}>Billing</button>
+                        </nav>
+                    </div>
+                    <div className="rightbox">
+                        {activeButton === 0 && <PersonalInfo />}
+                        {activeButton === 1 && <BillingInfo />}
+                    </div>
                 </div>
             </div>
         </div>

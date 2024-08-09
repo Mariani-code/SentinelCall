@@ -19,6 +19,11 @@ let userInfo = [
     { username: 'user2', firstName: "user", lastName: "two" }
 ];
 
+let billingInfo = [
+    { username: 'admin', phone: '555-432-5921', address: '854 Maple Street', country: 'United States', city: 'Columbus', state: 'Ohio' },
+    { username: 'user2', phone: '484-852-6885', address: '123 Real Street', country: 'China', city: 'Shanghai', state: 'N/A' }
+]
+
 let rooms = [
     { id: 1, number: '101', description: 'Conference Room', capacity: 10 },
     { id: 2, number: '102', description: 'Meeting Room', capacity: 6 },
@@ -30,6 +35,11 @@ let meetings = [
     { id: 2, name: 'Project Review', time: new Date('2024-07-30T14:00:00'), room: '102', participants: ['admin'] }
 ];
 
+let complaints = [
+    { id: 1, user: 'user2', complaint: 'Room 105 does not exist in the system' },
+    { id: 2, user: 'user4', complaint: 'My account should be an admin account' }
+];
+
 const isDoubleBooked = (participant, startTime, endTime) => {
     return meetings.some(meeting =>
         meeting.participants.includes(participant) &&
@@ -38,15 +48,35 @@ const isDoubleBooked = (participant, startTime, endTime) => {
     );
 };
 
-app.post('/grabInfo', (req, res) => {
+app.post('/grabAccountInfo', (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
 
-    if (token != null) {
+    if (token === null) {
         return res.status(400).json({ message: 'Please login to view account information' });
     }
 
-    return res.status(400).json({ message: 'Nothing to grab yet' });
+    const decode = jwt.verify(token, 'your_jwt_secret');
+
+    const user = users.find(obj => obj.username === decode.username);
+    const userI = userInfo.find(obj => obj.username === decode.username);
+
+    return res.status(200).json({ user, userI });
 });
+
+app.post('/grabBillingInfo', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+
+    if (token === null) {
+        return res.status(400).json({ message: 'Please login to view account information' });
+    }
+
+    const decode = jwt.verify(token, 'your_jwt_secret');
+
+    const user = billingInfo.find(obj => obj.username === decode.username);
+
+    return res.status(200).json({ user });
+});
+
 
 app.post('/rooms', (req, res) => {
     const { number, description, capacity } = req.body;
@@ -106,32 +136,86 @@ app.post('/login', (req, res) => {
     Client - Create meeting, create complaint, veiw meetings
 */
 app.post('/checkRole', (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (token == null) return res.status(401).json({ message: 'Unauthorized' });
-
     try {
+        const token = req.headers.authorization.split(' ')[1];
+
+        if (token === null) {
+            throw new Error();
+        }
+
         const decoded = jwt.verify(token, 'your_jwt_secret');
 
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
         if (decoded.username == "admin") {
-            console.log("GOOD");
             return res.status(200).json();
         }
         else {
-            console.log("BAD");
             return res.status(401).json({ message: 'Unauthorized' });
         }
     }
     catch (error) {
-        console.log('Error: ' + error.message);
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+});
+
+app.post('/resolveComplaint', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const { complaintID } = req.body;
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
+        const newComplaints = complaints.filter((complaint) => complaint.id !== complaintID);
+        complaints = newComplaints;
+
+        return res.status(200).json();
+    }
+    catch (error) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+});
+
+app.post('/addComplaint', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const { complaintID, complaintString } = req.body;
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
+        const newComplaint = {
+            id: complaintID,
+            user: decoded.username,
+            complaint: complaintString
+        };
+
+        complaints.push(newComplaint);
+        return res.status(200).json();
+    }
+    catch (error) {
+        return res.status(403).json({ message: 'Unauthorized' });
     }
 });
 
 app.post('/logout', (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    console.log(token);
-
-    //TODO add token to blacklist (or have some other way to invalidate it)
-    res.status(200).json();
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        //TODO add token to blacklist (or have some other way to invalidate it)
+        res.status(200).json();
+    }
+    catch {
+        res.status(400).json();
+    }
 });
 
 app.post('/createAccount', (req, res) => {
@@ -178,6 +262,10 @@ app.put('/meetings/:id', (req, res) => {
 
 app.get('/meetings', (req, res) => {
     res.json(meetings);
+});
+
+app.get('/complaints', (req, res) => {
+    res.json(complaints);
 });
 
 app.get('/rooms', (req, res) => {

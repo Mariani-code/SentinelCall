@@ -1,8 +1,15 @@
 /*Generic container (Makes Navbar and Sidebar look the same on each page)*/
-.main-container {
+.nav-container {
+    display: flex;
+    flex-direction: column;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
+}
+
+.nav-content {
+    display: flex;
+    flex: 1;
 }
 
 .navbar {
