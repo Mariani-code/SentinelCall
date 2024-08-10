@@ -3,12 +3,17 @@ import { useState, useLayoutEffect } from 'react';
 
 function BillingInfo() {
 
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
+    const [country, setCountry] = useState('');
+    const [city, setCity] = useState('');
+    const [state, setState] = useState('');
     const [message, setMessage] = useState('');
 
     const grabUserInfo = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:1000/grabInfo', {
+            const response = await fetch('http://localhost:1000/grabBillingInfo', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer: ${token}`
@@ -16,6 +21,11 @@ function BillingInfo() {
             });
             const data = await response.json();
             if (response.ok) {
+                setPhone(data.user.phone);
+                setAddress(data.user.address);
+                setCountry(data.user.country);
+                setCity(data.user.city);
+                setState(data.user.state);
             }
             else {
                 setMessage(data.message);
@@ -40,30 +50,35 @@ function BillingInfo() {
             </h2>
             <input
                 type="text"
+                value={phone}
             />
             <h2>
                 Billing Address
             </h2>
             <input
                 type="text"
+                value={address}
             />
             <h2>
                 Country
             </h2>
             <input
                 type="text"
+                value={country}
             />
             <h2>
                 City
             </h2>
             <input
                 type="text"
+                value={city}
             />
             <h2>
-                State
+                State/Province
             </h2>
             <input
                 type="text"
+                value={state}
             />
             <button>
                 Update

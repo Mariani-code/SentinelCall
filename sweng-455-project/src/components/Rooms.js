@@ -14,6 +14,30 @@ function Rooms() {
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [newRoom, setNewRoom] = useState({ number: '', description: '', capacity: '' });
 
+    const [showDiv, setShowDiv] = useState(false);
+
+    const fetchRole = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('http://localhost:1000/checkRole', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                setShowDiv(true);
+            }
+            else {
+                setShowDiv(false);
+            }
+        }
+        catch (error) {
+            console.log('Error: ' + error.message);
+            setShowDiv(false);
+        }
+    };
+
     const fetchRooms = async () => {
         try {
             const response = await fetch('http://localhost:1000/rooms');
@@ -51,44 +75,49 @@ function Rooms() {
 
     useEffect(() => {
         fetchRooms();
+        fetchRole();
     }, []);
 
     return (
-        <div className="main-container">
+        <div className='nav-container'>
             <Navbar />
-            <Sidebar />
-            <div className="rooms-container">
-                <h2>Meeting Rooms</h2>
-                {error && <p className="error-message">{error}</p>}
-                <div className="rooms-list">
-                    {rooms.length > 0 ? (
-                        rooms.map(room => (
-                            <div
-                                key={room.id}
-                                className={`room-card ${selectedRoom === room.id ? 'selected' : ''}`}
-                                onClick={() => setSelectedRoom(room.id)}>
-                                <h3 className="room-number">Room {room.number}</h3>
-                                <p className="room-description">{room.description}</p>
-                                <p className="room-capacity">Capacity: {room.capacity}</p>
-                                <p className="room-meetings">
-                                    Meetings:
-                                    {room.meetings.length > 0 ? (
-                                        <ul>
-                                            {room.meetings.map(meeting => (
-                                                <li key={meeting.id}>{meeting.name} at {new Date(meeting.time).toLocaleString()}</li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <span> No meetings scheduled.</span>
-                                    )}
-                                </p>
-                            </div>
-                        ))
-                    ) : (
-                        <p> No rooms available.</p>
-                    )}
-                    <div className="add-room">
-                        <h3>Add a New Room</h3>
+            <div className='nav-content'>
+                <Sidebar />
+                <div className="rooms-container">
+                    <h2>Meeting Rooms</h2>
+                    {error && <p className="error-message">{error}</p>}
+                    <div className="rooms-list">
+                        {rooms.length > 0 ? (
+                            rooms.map(room => (
+                                <div
+                                    key={room.id}
+                                    className={`room-card ${selectedRoom === room.id ? 'selected' : ''}`}
+                                    onClick={() => setSelectedRoom(room.id)}>
+                                    <h3 className="room-number">Room {room.number}</h3>
+                                    <p className="room-description">{room.description}</p>
+                                    <p className="room-capacity">Capacity: {room.capacity}</p>
+                                    <p className="room-meetings">
+                                        Meetings:
+                                        {room.meetings.length > 0 ? (
+                                            <ul>
+                                                {room.meetings.map(meeting => (
+                                                    <li key={meeting.id}>{meeting.name} at {new Date(meeting.time).toLocaleString()}</li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <span> No meetings scheduled.</span>
+                                        )}
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <p> No rooms available.</p>
+                        )}
+                    </div>
+                    {showDiv && <div className="add-room">
+                        <div>
+                            <h3>Add a New Room</h3>
+                        </div>
                         <form onSubmit={handleAddRoom}>
                             <input
                                 type="text"
@@ -97,6 +126,7 @@ function Rooms() {
                                 onChange={e => setNewRoom({ ...newRoom, number: e.target.value })}
                                 required
                             />
+                            <br />
                             <input
                                 type="text"
                                 placeholder="Description"
@@ -104,6 +134,7 @@ function Rooms() {
                                 onChange={e => setNewRoom({ ...newRoom, description: e.target.value })}
                                 required
                             />
+                            <br />
                             <input
                                 type="number"
                                 placeholder="Capacity"
@@ -111,9 +142,10 @@ function Rooms() {
                                 onChange={e => setNewRoom({ ...newRoom, capacity: e.target.value })}
                                 required
                             />
+                            <br />
                             <button type="submit">Add Room</button>
                         </form>
-                    </div>
+                    </div> }
                 </div>
             </div>
         </div>

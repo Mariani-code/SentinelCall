@@ -39,6 +39,11 @@ let seedUserInfo = [
     new User("Test1", "User1", "test@test.com"),
     new User("Test2", "User2", "test2@test.com"),
     new User("Test3","User3", "test3@test.com"),
+];
+
+let billingInfo = [
+    { username: 'admin', phone: '555-432-5921', address: '854 Maple Street', country: 'United States', city: 'Columbus', state: 'Ohio' },
+    { username: 'user2', phone: '484-852-6885', address: '123 Real Street', country: 'China', city: 'Shanghai', state: 'N/A' }
 ]
 
 let rooms = [
@@ -156,6 +161,10 @@ TODO: Any administrative actions that delete references need to be done
 deleted as well, for example. Same goes for users that are no longer in the DB
 but may still be in a meeting.
 */
+let complaints = [
+    { id: 1, user: 'user2', complaint: 'Room 105 does not exist in the system' },
+    { id: 2, user: 'user4', complaint: 'My account should be an admin account' }
+];
 
 const isDoubleBooked = (participant, startTime, endTime) => {
     return meetings.some(meeting =>
@@ -165,14 +174,19 @@ const isDoubleBooked = (participant, startTime, endTime) => {
     );
 };
 
-app.post('/grabInfo', (req, res) => {
+app.post('/grabAccountInfo', (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
 
-    if (token != null) {
+    if (token === null) {
         return res.status(400).json({ message: 'Please login to view account information' });
     }
 
-    return res.status(400).json({ message: 'Nothing to grab yet' });
+    const decode = jwt.verify(token, 'your_jwt_secret');
+
+    const user = users.find(obj => obj.username === decode.username);
+    const userI = userInfo.find(obj => obj.username === decode.username);
+
+    return res.status(200).json({ user, userI });
 });
 
 app.post('/rooms', async (req, res) => {
@@ -198,6 +212,52 @@ app.post('/rooms', async (req, res) => {
     // rooms.push(newRoom);
     // res.status(201).json(newRoom);
 });
+
+app.post('/grabBillingInfo', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+
+    if (token === null) {
+        return res.status(400).json({ message: 'Please login to view account information' });
+    }
+
+    const decode = jwt.verify(token, 'your_jwt_secret');
+
+    const user = billingInfo.find(obj => obj.username === decode.username);
+
+    return res.status(200).json({ user });
+});
+
+
+// app.post('/rooms', (req, res) => {
+//     const { number, description, capacity } = req.body;
+//     const newRoom = {
+//         id: rooms.length + 1,
+//         number,
+//         description,
+//         capacity
+//     };
+
+//     rooms.push(newRoom);
+//     res.status(201).json(newRoom);
+// });
+
+// app.post('/meetings', (req, res) => {
+//     const { name, time, room, participants } = req.body;
+//     const startTime = new Date(time);
+//     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+
+//     // Check if any participant is double-booked
+//     const doubleBooked = participants.some(participant => isDoubleBooked(participant, startTime, endTime));
+
+//     if (doubleBooked) {
+//         return res.status(400).json({ message: 'One or more participants are double-booked.' });
+//     }
+
+//     // TODO: Decide what should be returned here. This end-point could be specific for updating,
+//     // and the client can just make sure it refreshes after posting.
+//     // rooms.push(newRoom);
+//     // res.status(201).json(newRoom);
+// });
 
 app.post('/test', async (req, res) => {
     try {
@@ -315,32 +375,86 @@ app.post('/login', async (req, res) => {
     Client - Create meeting, create complaint, veiw meetings
 */
 app.post('/checkRole', (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (token == null) return res.status(401).json({ message: 'Unauthorized' });
-
     try {
+        const token = req.headers.authorization.split(' ')[1];
+
+        if (token === null) {
+            throw new Error();
+        }
+
         const decoded = jwt.verify(token, 'your_jwt_secret');
 
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
         if (decoded.username == "admin") {
-            console.log("GOOD");
             return res.status(200).json();
         }
         else {
-            console.log("BAD");
             return res.status(401).json({ message: 'Unauthorized' });
         }
     }
     catch (error) {
-        console.log('Error: ' + error.message);
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+});
+
+app.post('/resolveComplaint', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const { complaintID } = req.body;
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
+        const newComplaints = complaints.filter((complaint) => complaint.id !== complaintID);
+        complaints = newComplaints;
+
+        return res.status(200).json();
+    }
+    catch (error) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+});
+
+app.post('/addComplaint', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const { complaintID, complaintString } = req.body;
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
+        const newComplaint = {
+            id: complaintID,
+            user: decoded.username,
+            complaint: complaintString
+        };
+
+        complaints.push(newComplaint);
+        return res.status(200).json();
+    }
+    catch (error) {
+        return res.status(403).json({ message: 'Unauthorized' });
     }
 });
 
 app.post('/logout', (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    console.log(token);
-
-    //TODO add token to blacklist (or have some other way to invalidate it)
-    res.status(200).json();
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        //TODO add token to blacklist (or have some other way to invalidate it)
+        res.status(200).json();
+    }
+    catch {
+        res.status(400).json();
+    }
 });
 
 app.post('/createAccount', (req, res) => {
@@ -439,6 +553,19 @@ app.get('/rooms', async (req, res) => {
     // res.json(updatedRooms);
     res.json(retrievedRooms);
 });
+
+app.get('/complaints', (req, res) => {
+    res.json(complaints);
+});
+
+// app.get('/rooms', (req, res) => {
+//     const updatedRooms = rooms.map(room => ({
+//         ...room,
+//         meetings: meetings.filter(meeting => meeting.room === room.number)
+//     }));
+//     res.json(updatedRooms);
+// >>>>>>> master
+// });
 
 app.get('/', (req, res) => {
     res.send('Your server is running');

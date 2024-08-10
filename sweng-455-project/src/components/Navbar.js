@@ -6,8 +6,8 @@ export function Navbar() {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        const token = localStorage.getItem('token');
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:1000/logout', {
                 method: 'POST',
                 headers: {
@@ -18,13 +18,16 @@ export function Navbar() {
                 localStorage.removeItem('token');
                 navigate('/login');
             }
+            else {
+                navigate('/login');
+            }
         }
         catch (error) {
+            navigate('/login');
             console.log('Error: ' + error.message);
         }
     }
-
-
+    
     return (
         <nav className="navbar">
             <h1>SentinelCall</h1>
