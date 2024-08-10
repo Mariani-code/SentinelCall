@@ -149,7 +149,7 @@ function MyMeetings() {
                                 {meeting.participants && meeting.participants.length > 0 ? (
                                     <ul className="participants-list">
                                         {meeting.participants.map((participant, index) => (
-                                            <li key={participant}>{participant}</li>
+                                            <li key={crypto.randomUUID()}>{participant.firstName} {participant.lastName}</li>
                                         ))}
                                     </ul>
                                 ) : (
