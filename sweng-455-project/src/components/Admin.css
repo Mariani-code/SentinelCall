@@ -1,0 +1,40 @@
+.users-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+    .users-container h2 {
+        color: #004b87;
+        margin-bottom: 20px;
+    }
+
+.users-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 1%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.manage-users-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-top: 10px;
+    margin-right: 1%;
+}
+
+.users-name {
+    font-size: 18px;
+    color: #333;
+}

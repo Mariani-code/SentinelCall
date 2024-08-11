@@ -8,6 +8,7 @@ function BillingInfo() {
     const [country, setCountry] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
+
     const [message, setMessage] = useState('');
 
     const grabUserInfo = async () => {
@@ -39,6 +40,27 @@ function BillingInfo() {
         grabUserInfo();
     }, []);
 
+    const handleUpdate = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:1000/updateAccountBilling', {
+                method: 'POST',
+                headers: {
+                    'Content-type': `application/json`,
+                    'Authorization': `Bearer: ${token}`
+                },
+                body: JSON.stringify({ phone, address, country, city, state })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+            grabUserInfo();
+        } catch (error) {
+            setMessage('Error ' + error.message);
+        }
+    }
+
     return (
         <div className="info-container">
             <h1>
@@ -51,6 +73,7 @@ function BillingInfo() {
             <input
                 type="text"
                 value={phone}
+                onChange={(e) => setPhone(e.target.value)}
             />
             <h2>
                 Billing Address
@@ -58,6 +81,7 @@ function BillingInfo() {
             <input
                 type="text"
                 value={address}
+                onChange={(e) => setAddress(e.target.value)}
             />
             <h2>
                 Country
@@ -65,6 +89,7 @@ function BillingInfo() {
             <input
                 type="text"
                 value={country}
+                onChange={(e) => setCountry(e.target.value)}
             />
             <h2>
                 City
@@ -72,6 +97,7 @@ function BillingInfo() {
             <input
                 type="text"
                 value={city}
+                onChange={(e) => setCity(e.target.value)}
             />
             <h2>
                 State/Province
@@ -79,8 +105,9 @@ function BillingInfo() {
             <input
                 type="text"
                 value={state}
+                onChange={(e) => setState(e.target.value)}
             />
-            <button>
+            <button onClick={handleUpdate}>
                 Update
             </button>
         </div>
