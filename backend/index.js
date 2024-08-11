@@ -374,15 +374,17 @@ app.post('/login', async (req, res) => {
     try {
         var loginCredentialsSnapshot = await getDocs(loginCredQuery);
         var userReference;
+        var isAdmin;
         loginCredentialsSnapshot.forEach(async (doc) => {
             console.log(doc.id, " => ", doc.data());
+            isAdmin = doc.data().isAdmin;
             userReference = doc.data().userRef;
         })
         // // 2. Get user document from users collection
         const usersCollection = collection(db, "users");
         const userSnapshot = await getDoc(userReference);
     
-        const { firstName, lastName, id, isAdmin} = userSnapshot.data();
+        const { firstName, lastName, id } = userSnapshot.data();
         const retrievedEmail = userSnapshot.data().email // different var name due to name collision
     
         // Generate a token or send a success response
@@ -391,7 +393,7 @@ app.post('/login', async (req, res) => {
             firstName, 
             lastName, 
             id, 
-            isAdmin 
+            isAdmin ,
         },
         'your_jwt_secret', 
         { expiresIn: '1h' });
