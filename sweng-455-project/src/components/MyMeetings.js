@@ -12,7 +12,7 @@ function MyMeetings() {
     const fetchMeetings = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:1000/meetings', {
+            const response = await fetch('http://localhost:1000/meetings_api/all', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -37,7 +37,7 @@ function MyMeetings() {
     const addParticipants = async (meetingId, participantsToAdd) => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`http://localhost:1000/meetings/${meetingId}`, {
+            const response = await fetch(`http://localhost:1000/meetings_api/updateParticipants`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ function MyMeetings() {
     const removeParticipants = async (meetingId, participantsToRemove) => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`http://localhost:1000/meetings/${meetingId}`, {
+            const response = await fetch(`http://localhost:1000/meetings_api/updateParticipants`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

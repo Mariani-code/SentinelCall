@@ -10,11 +10,16 @@ const { Room } = require('./room');
 const { Complaint } = require('./complaint');
 const { firebaseConfig } = require('./firebaseConfig');
 
+const meetings_api = require('./routes/meetings_api');
+
 const app = express();
 const port = 1000;
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use('/meetings_api', meetings_api);
+// app.use('/users_api');
+// app.use('/rooms_api');
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
@@ -283,81 +288,9 @@ app.post('/test', async (req, res) => {
     }
 })
 
-app.post('/meetings', async (req, res) => {
-    const { name, time, room, participants } = req.body;
-
-    // This is just for stubbing purposes until front-end can query Users db:
-    const testParticipants = [{
-        email: "sqs6434@psu.edu"
-    },
-    {
-        email: "okm5046@psu.edu"
-    },
-    {
-        email: "jcm6309@psu.edu"
-    }];
-
-    console.log(req.body)
-
-    // TODO: Verify the room chosen exists, and get its document ID.
-
-    const startTime = time ? new Date(time) : new Date();
-    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-
-    // TODO: Commenting out for now - Will return to this feature later:
-    // Check if any participant is double-booked
-    // const doubleBooked = participants.some(participant => isDoubleBooked(participant, startTime, endTime));
-
-    // if (doubleBooked) {
-    //     return res.status(400).json({ message: 'One or more participants are double-booked.' });
-    // }
-
-    // Insertion with reference is possible, but not very clear from documentation.
-    // Perform query to match desired item.
-    // using the doc object in the forEach, grab the doc.ref value, store in array.
-
-    const roomsCollection = collection(db, "rooms");
-    // TODO: Change the query to check for equality on the unique room ID.
-    const roomQuery = query(roomsCollection, where("description", "==", room ? room : "The Colosseum"));
-    const roomSnapshot = await getDocs(roomQuery);
-    // Should only return one room:
-    var roomReference;
-    roomSnapshot.forEach(async (doc) => {
-        console.log(doc.id, " => ", doc.data());
-        roomReference = doc.ref;
-    });
-
-    var allUserReferences = [];
-    for (participant of testParticipants) {
-        console.log(`Have ${participant}, looking for ${participant.email}`);
-        const usersCollection = collection(db, "users");
-        const userQuery = query(usersCollection, where("email", "==", participant.email));
-        const userSnapshot = await getDocs(userQuery);
-        userSnapshot.forEach(async (doc) => {
-            console.log(doc.id, " => ", doc.data());
-            allUserReferences.push(doc.ref);
-        })
-    }
-
-    try {
-        const docRef = await addDoc(collection(db, "meetings"), {
-            id: crypto.randomUUID(),
-            name,
-            time: startTime,
-            room: roomReference,
-            participants: allUserReferences
-        });
-        console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-        // TODO: Handle this on front-end as well.
-        console.error("Error adding document: ", e);
-    }
-    res.status(201);
-});
-
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    console.log("Incoming user/pass: " ,email, password);
+    console.log("Incoming user/pass: " , email, password);
     // Dummy authentication check
     // const user = users.find(user => user.username === username && user.password === password);
     // TODO: Provide some form of regex check here, or other sanitization, before querying.
@@ -521,34 +454,34 @@ app.post('/createAccount', async (req, res) => {
     }
 });
 
-app.put('/meetings/:id', (req, res) => {
-    const { participantsToAdd, participantsToRemove } = req.body;
-    const meetingId = parseInt(req.params.id);
-    let meeting = meetings.find(m => m.id === meetingId);
+// app.put('/meetings/:id', (req, res) => {
+//     const { participantsToAdd, participantsToRemove } = req.body;
+//     const meetingId = parseInt(req.params.id);
+//     let meeting = meetings.find(m => m.id === meetingId);
 
-    if (!meeting) {
-        return res.status(404).json({ message: 'Meeting not found' });
-    }
+//     if (!meeting) {
+//         return res.status(404).json({ message: 'Meeting not found' });
+//     }
 
-    meeting.participants = meeting.participants.filter(participant => !participantsToRemove.includes(participant));
+//     meeting.participants = meeting.participants.filter(participant => !participantsToRemove.includes(participant));
 
-    const errors = [];
-    participantsToAdd.forEach(participant => {
-        const startTime = new Date(meeting.time);
-        const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-        if (!isDoubleBooked(participant, startTime, endTime)) {
-            meeting.participants.push(participant);
-        } else {
-            errors.push(`Participant ${participant} is double-booked.`);
-        }
-    });
+//     const errors = [];
+//     participantsToAdd.forEach(participant => {
+//         const startTime = new Date(meeting.time);
+//         const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+//         if (!isDoubleBooked(participant, startTime, endTime)) {
+//             meeting.participants.push(participant);
+//         } else {
+//             errors.push(`Participant ${participant} is double-booked.`);
+//         }
+//     });
 
-    if (errors.length > 0) {
-        res.status(400).json({ message: errors.join(" ") });
-    } else {
-        res.status(200).json(meeting);
-    }
-});
+//     if (errors.length > 0) {
+//         res.status(400).json({ message: errors.join(" ") });
+//     } else {
+//         res.status(200).json(meeting);
+//     }
+// });
 
 async function getParticipantsAsUsers(participants) {
     var users = [];
@@ -559,29 +492,6 @@ async function getParticipantsAsUsers(participants) {
     }
     return users;
 };
-
-app.get('/meetings', async (req, res) => {
-    // get all meetings
-    // get room per meeting
-    // get all users in each meeting.
-    console.log('GET /meetings...')
-    const querySnapshot = await getDocs(collection(db, "meetings"));
-    var meetings = await Promise.all(querySnapshot.docs.map(async (doc) => {
-
-        var {name, time, room, participants } = doc.data();
-        console.log(doc.id); // Maps to the ID shown in Firebase console.
-
-        const roomName = await getDoc(room);
-
-        // For some reason, Date objects in JS require 3 extra digits...
-
-        var users = await getParticipantsAsUsers(participants);
-        return new Meeting(name, roomName.data().description, time.seconds * 1000, users);
-    }))
-    .then((result) => {
-        res.json(result);
-    });
-});
 
 app.get('/rooms', async (req, res) => {
     const querySnapshot = await getDocs(collection(db, "rooms"));
@@ -598,6 +508,24 @@ app.get('/rooms', async (req, res) => {
     });
 
     res.json(retrievedRooms);
+});
+
+
+app.get('/users', async (req, res) => {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    console.log('After query...')
+    var retrievedUsers = [];
+    querySnapshot.forEach((doc) => {
+        console.log(`${doc.id} => ${doc.data()}`);
+        var { firstName, lastName, email } = doc.data();
+        var user = new User(firstName, lastName, email);
+        retrievedUsers.push(user);
+
+        //TODO: For each room, get its meetings. - This should be
+        // admin only, since this may reveal more than needed to a user.
+    });
+
+    res.json(retrievedUsers);
 });
 
 app.get('/complaints', (req, res) => {
