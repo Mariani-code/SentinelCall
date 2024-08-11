@@ -12,7 +12,7 @@ function MyMeetings() {
     const fetchMeetings = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:1000/meetings_api/all', {
+            const response = await fetch('http://localhost:1000/meetings_api/byOwner', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`

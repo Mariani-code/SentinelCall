@@ -10,7 +10,16 @@ const { Room } = require('./room');
 const { Complaint } = require('./complaint');
 const { firebaseConfig } = require('./firebaseConfig');
 
+// Initialize Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(firebaseApp);
+connectFirestoreEmulator(db, 'localhost', 9000);
+
 const meetings_api = require('./routes/meetings_api');
+const users_api = require('./routes/users_api')
+const rooms_api = require('./routes/rooms_api')
 
 const app = express();
 const port = 1000;
@@ -18,15 +27,9 @@ const port = 1000;
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/meetings_api', meetings_api);
-// app.use('/users_api');
-// app.use('/rooms_api');
+app.use('/users_api', users_api);
+app.use('/rooms_api', rooms_api);
 
-// Initialize Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(firebaseApp);
-connectFirestoreEmulator(db, 'localhost', 9000);
 
 let users = [
     { username: 'admin', password: 'admin', email: 'admin@company.xyz' },
@@ -39,9 +42,9 @@ let userInfo = [
 ];
 
 let seedUserInfo = [
-    new User("Test1", "User1", "test@test.com"),
-    new User("Test2", "User2", "test2@test.com"),
-    new User("Test3","User3", "test3@test.com"),
+    new User("Test1", "User1", "test@test.com", "1234"),
+    new User("Test2", "User2", "test2@test.com", "5678"),
+    new User("Test3","User3", "test3@test.com", "9012"),
 ];
 
 let billingInfo = [
@@ -56,7 +59,7 @@ let rooms = [
 ];
 
 let seedRoomInfo = [
-    new Room(crypto.randomUUID(), 101, 'Conference Room', 100, 100),
+    new Room(crypto.randomUUID(), 101, 'Conference Room', 100, true),
     new Room(crypto.randomUUID(), 102, 'Board Room', 50),
     new Room(crypto.randomUUID(), 103, 'Training Room', 20)
 ];
@@ -104,14 +107,14 @@ app.get('/roomSeed', async (req, res) => {
     var ids = [];
     // TODO: This may be 3 separate POST requests. Double check if this can be batched up.
     for (room of seedRoomInfo) {
-        const { id, number, description, capacity, hourlyRate } = room;
+        const { id, number, description, capacity, isPremium } = room;
         try {
             const docRef = await addDoc(collection(db, "rooms"), {
                 id,
                 number,
                 description,
                 capacity,
-                hourlyRate,
+                isPremium,
             });
             console.log("Document written with ID: ", docRef.id);
             ids.push(docRef.id);
@@ -238,7 +241,8 @@ app.post('/grabAccountInfo', async (req, res) => {
 });
 
 app.post('/rooms', async (req, res) => {
-    const { number, description, capacity, hourlyRate } = req.body;
+    const { number, description, capacity, isPremium } = req.body;
+    console.log( req.body);
     // TODO: Add guards to ensure fields in body match desired types
     try {
         const docRef = await addDoc(collection(db, "rooms"), {
@@ -246,7 +250,7 @@ app.post('/rooms', async (req, res) => {
           number: number,
           capacity: capacity,
           description: description,
-          hourlyRate: hourlyRate ? hourlyRate : 0,
+          isPremium: isPremium ? true : false,
         });
         console.log("Document written with ID: ", docRef.id);
         res.send(201);
@@ -454,44 +458,34 @@ app.post('/createAccount', async (req, res) => {
     }
 });
 
-// app.put('/meetings/:id', (req, res) => {
-//     const { participantsToAdd, participantsToRemove } = req.body;
-//     const meetingId = parseInt(req.params.id);
-//     let meeting = meetings.find(m => m.id === meetingId);
+app.put('/meetings/:id', (req, res) => {
+    const { participantsToAdd, participantsToRemove } = req.body;
+    const meetingId = parseInt(req.params.id);
+    let meeting = meetings.find(m => m.id === meetingId);
 
-//     if (!meeting) {
-//         return res.status(404).json({ message: 'Meeting not found' });
-//     }
-
-//     meeting.participants = meeting.participants.filter(participant => !participantsToRemove.includes(participant));
-
-//     const errors = [];
-//     participantsToAdd.forEach(participant => {
-//         const startTime = new Date(meeting.time);
-//         const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-//         if (!isDoubleBooked(participant, startTime, endTime)) {
-//             meeting.participants.push(participant);
-//         } else {
-//             errors.push(`Participant ${participant} is double-booked.`);
-//         }
-//     });
-
-//     if (errors.length > 0) {
-//         res.status(400).json({ message: errors.join(" ") });
-//     } else {
-//         res.status(200).json(meeting);
-//     }
-// });
-
-async function getParticipantsAsUsers(participants) {
-    var users = [];
-    for (const participant of participants) {
-        let userData = await getDoc(participant);
-        var { firstName, lastName, email } = userData.data();
-        users.push(new User(firstName, lastName, email));
+    if (!meeting) {
+        return res.status(404).json({ message: 'Meeting not found' });
     }
-    return users;
-};
+
+    meeting.participants = meeting.participants.filter(participant => !participantsToRemove.includes(participant));
+
+    const errors = [];
+    participantsToAdd.forEach(participant => {
+        const startTime = new Date(meeting.time);
+        const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+        if (!isDoubleBooked(participant, startTime, endTime)) {
+            meeting.participants.push(participant);
+        } else {
+            errors.push(`Participant ${participant} is double-booked.`);
+        }
+    });
+
+    if (errors.length > 0) {
+        res.status(400).json({ message: errors.join(" ") });
+    } else {
+        res.status(200).json(meeting);
+    }
+});
 
 app.get('/rooms', async (req, res) => {
     const querySnapshot = await getDocs(collection(db, "rooms"));
@@ -499,8 +493,8 @@ app.get('/rooms', async (req, res) => {
     var retrievedRooms = [];
     querySnapshot.forEach((doc) => {
         console.log(`${doc.id} => ${doc.data()}`);
-        var { id, number, description, capacity } = doc.data();
-        var room = new Room(id, number, description, capacity);
+        var { id, number, description, capacity, isPremium } = doc.data();
+        var room = new Room(id, number, description, capacity, isPremium);
         retrievedRooms.push(room);
 
         //TODO: For each room, get its meetings. - This should be
@@ -508,24 +502,6 @@ app.get('/rooms', async (req, res) => {
     });
 
     res.json(retrievedRooms);
-});
-
-
-app.get('/users', async (req, res) => {
-    const querySnapshot = await getDocs(collection(db, "users"));
-    console.log('After query...')
-    var retrievedUsers = [];
-    querySnapshot.forEach((doc) => {
-        console.log(`${doc.id} => ${doc.data()}`);
-        var { firstName, lastName, email } = doc.data();
-        var user = new User(firstName, lastName, email);
-        retrievedUsers.push(user);
-
-        //TODO: For each room, get its meetings. - This should be
-        // admin only, since this may reveal more than needed to a user.
-    });
-
-    res.json(retrievedUsers);
 });
 
 app.get('/complaints', (req, res) => {

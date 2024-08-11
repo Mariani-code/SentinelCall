@@ -12,7 +12,7 @@ function Rooms() {
     const [rooms, setRooms] = useState([]);
     const [error, setError] = useState('');
     const [selectedRoom, setSelectedRoom] = useState(null);
-    const [newRoom, setNewRoom] = useState({ number: '', description: '', capacity: '' });
+    const [newRoom, setNewRoom] = useState({ number: '', description: '', capacity: '', isPremium: false });
 
     const [showDiv, setShowDiv] = useState(false);
 
@@ -64,7 +64,7 @@ function Rooms() {
             });
             if (response.ok) {
                 fetchRooms();
-                setNewRoom({ number: '', description: '', capacity: '' });
+                setNewRoom({ number: '', description: '', capacity: '', isPremium: false });
             } else {
                 setError('Failed to add room');
             }
@@ -96,6 +96,13 @@ function Rooms() {
                                     <h3 className="room-number">Room {room.number}</h3>
                                     <p className="room-description">{room.description}</p>
                                     <p className="room-capacity">Capacity: {room.capacity}</p>
+                                    {room.isPremium ? (
+                                        <p className="room-isPremium">Payment Required 💰</p>
+                                    ):
+                                    (
+                                        <></>
+                                    )}
+                                    
                                     <p className="room-meetings">
                                         Meetings:
                                         {room.meetings.length > 0 ? (
@@ -142,6 +149,17 @@ function Rooms() {
                                 onChange={e => setNewRoom({ ...newRoom, capacity: e.target.value })}
                                 required
                             />
+                            <br />
+                            <label>
+                                Premium Room: 
+                            <input
+                                type="checkbox"
+                                value={newRoom.isPremium}
+                                onChange={e => {
+                                    setNewRoom({ ...newRoom, isPremium: e.target.checked})     
+                                }}
+                            />
+                             </label>
                             <br />
                             <button type="submit">Add Room</button>
                         </form>

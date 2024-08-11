@@ -42,7 +42,7 @@ function MeetingForm() {
     const fetchParticipants = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:1000/users', {
+            const response = await fetch('http://localhost:1000/users_api/all', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -78,6 +78,7 @@ function MeetingForm() {
     }, [id, isUpdateMode]);
 
     const handleFormSubmit = async (event) => {
+        const token = localStorage.getItem('token');
         event.preventDefault();
         console.log(event);
         const payload = JSON.stringify({ name, time, room, participants: selectedParticipants});
@@ -87,7 +88,10 @@ function MeetingForm() {
         try {
             const response = await fetch(endpoint, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: payload
             });
 
@@ -133,6 +137,7 @@ function MeetingForm() {
                             name="RoomSelect"
                             onChange={e => setRoom(e.target.value)}
                         >
+                            <option value="">----</option>
                             { rooms.length > 0 ? rooms.map(room => {
                                 return (
                                     <option value={room.id}>
@@ -159,8 +164,8 @@ function MeetingForm() {
                         >
                             { participants.length > 0 ? participants.map(user => {
                                     return (
-                                        <option value={user.email}>
-                                            {user.firstName} {user.lastName} (user.email)
+                                        <option value={user.id}>
+                                            {user.firstName} {user.lastName} ({user.email})
                                         </option>
                                     )
                                 })

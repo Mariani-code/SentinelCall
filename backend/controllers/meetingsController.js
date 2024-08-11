@@ -3,6 +3,7 @@ const { collection, query, where, addDoc, getDoc, getDocs, getFirestore, connect
 const { firebaseConfig } = require('../firebaseConfig');
 const { User } = require('../user');
 const { Meeting } = require('../meeting');
+const jwt = require('jsonwebtoken');
 
 const weekInSeconds = 7 * 24 * 60 * 60;
 const dayInSeconds = 24 * 60 * 60;
@@ -18,26 +19,29 @@ async function getParticipantsAsUsers(participants) {
     var users = [];
     for (const participant of participants) {
         let userData = await getDoc(participant);
-        var { firstName, lastName, email } = userData.data();
-        users.push(new User(firstName, lastName, email));
+        var { firstName, lastName, email, id } = userData.data();
+        users.push(new User(firstName, lastName, email, id));
     }
     return users;
 };
 
-
+/*
+Creates meeting with:
+    name: String,
+    time: timestamp
+    room: roomID
+    participants: user IDs
+*/
 exports.createMeeting = async (req, res) => {
     const { name, time, room, participants } = req.body;
 
-    // This is just for stubbing purposes until front-end can query Users db:
-    // const testParticipants = [{
-    //     email: "sqs6434@psu.edu"
-    // },
-    // {
-    //     email: "okm5046@psu.edu"
-    // },
-    // {
-    //     email: "jcm6309@psu.edu"
-    // }];
+    const token = req.headers.authorization.split(' ')[1];
+    if (token === null) {
+        return res.status(400).json({ message: 'Please login to view account information' });
+    }
+
+    const decode = jwt.verify(token, 'your_jwt_secret');
+    const ownerID = decode.id
 
     console.log(req.body)
 
@@ -51,7 +55,7 @@ exports.createMeeting = async (req, res) => {
 
     const roomsCollection = collection(db, "rooms");
     // TODO: Change the query to check for equality on the unique room ID.
-    const roomQuery = query(roomsCollection, where("id", "==", room ? room : "The Colosseum"));
+    const roomQuery = query(roomsCollection, where("id", "==", room));
     const roomSnapshot = await getDocs(roomQuery);
     // Should only return one room:
     var roomReference;
@@ -60,12 +64,11 @@ exports.createMeeting = async (req, res) => {
         roomReference = doc.ref;
     });
 
-    // Had to change interface here a bit. No longer getting participant objects, just an array of e-mails.
     var allUserReferences = [];
     for (participant of participants) {
         // console.log(`Have ${participant}, looking for ${participant.email}`);
         const usersCollection = collection(db, "users");
-        const userQuery = query(usersCollection, where("email", "==", participant));
+        const userQuery = query(usersCollection, where("id", "==", participant));
         const userSnapshot = await getDocs(userQuery);
         userSnapshot.forEach(async (doc) => {
             console.log(doc.id, " => ", doc.data());
@@ -80,7 +83,7 @@ exports.createMeeting = async (req, res) => {
             time: startTime,
             room: roomReference,
             participants: allUserReferences,
-            ownerID: "f4541dd7-f331-40bd-9603-b8520b2102b8"
+            ownerID,
         });
         console.log("Document written with ID: ", docRef.id);
         res.json({"message" : "Meeting created"});
@@ -91,6 +94,10 @@ exports.createMeeting = async (req, res) => {
     }
 };
 
+/*
+Gets meeting with:
+    timestamp
+*/
 exports.getMeetingAtTime = async (req, res) => {
     // Timestamp has to be exact. Both the seconds and nanoseconds property.
     // Need to normalize time going into db to prevent mismatches...
@@ -106,7 +113,7 @@ exports.getMeetingAtTime = async (req, res) => {
         const meetingSnapshot = await getDocs(meetingQuery);
         await meetingRoomAndParticipantPromises(meetingSnapshot)
         .then((result) => {
-            res.json({ message: "Meetings found.", meetings : result});
+            res.json(result);
         });
     } catch (e) {
         res.status(401).json({ message: 'Invalid meeting search request.' });
@@ -129,7 +136,7 @@ exports.getMeetingsOnDay = async (req, res) => {
         const meetingSnapshot = await getDocs(meetingQuery);
         await meetingRoomAndParticipantPromises(meetingSnapshot)
         .then((result) => {
-            res.json({ message: "Meetings found.", meetings : result});
+            res.json(result);
         });
     } catch (e) {
         res.status(401).json({ message: 'Invalid meeting search request.', error: e });
@@ -152,13 +159,17 @@ exports.getMeetingsByWeek = async (req, res) => {
         const meetingSnapshot = await getDocs(meetingQuery);
         await meetingRoomAndParticipantPromises(meetingSnapshot)
         .then((result) => {
-            res.json({ message: "Meetings found.", meetings : result});
+            res.json(result);
         });
     } catch (e) {
         res.status(401).json({ message: 'Invalid meeting search request.', error: e });
     }
 };
 
+/*
+Gets meeting with:
+    room: roomID
+*/
 exports.getMeetingsByRoom = async (req, res) => {
     // get meetings held in a specific room.
     const { roomID } = req.body; 
@@ -190,7 +201,7 @@ exports.getMeetingsByRoom = async (req, res) => {
         const meetingSnapshot = await getDocs(meetingQuery);
         await meetingRoomAndParticipantPromises(meetingSnapshot)
         .then((result) => {
-            res.json({ message: "Meetings found.", meetings : result});
+            res.json(result);
         });
     } catch (e) {
         res.status(401).json({ message: 'Invalid meeting search request.', error: e });
@@ -210,9 +221,21 @@ exports.getAllMeetings = async (req, res) => {
     });
 };
 
+/*
+Gets meeting with:
+    user (ownerID) - id stored in the jwt token.
+*/
 exports.getMeetingsByOwner = async (req, res) => {
     // get meetings created by a specific user.
-    const { ownerID } = req.body; 
+
+    const token = req.headers.authorization.split(' ')[1];
+    if (token === null) {
+        return res.status(400).json({ message: 'Please login to view account information' });
+    }
+
+    const decode = jwt.verify(token, 'your_jwt_secret');
+    const ownerID = decode.id
+
     const meetingCollection = collection(db, "meetings");
     const meetingQuery = query(meetingCollection,
         where("ownerID", "==", ownerID),
@@ -222,7 +245,7 @@ exports.getMeetingsByOwner = async (req, res) => {
         const meetingSnapshot = await getDocs(meetingQuery);
         await meetingRoomAndParticipantPromises(meetingSnapshot)
         .then((result) => {
-            res.json({ message: "Meetings found.", meetings : result});
+            res.json(result);
         });
     } catch (e) {
         res.status(401).json({ message: 'Invalid meeting search request.', error: e });
@@ -260,7 +283,7 @@ exports.getMeetingsByParticipant = async (req, res) => {
         const meetingSnapshot = await getDocs(meetingQuery);
         await meetingRoomAndParticipantPromises(meetingSnapshot)
         .then((result) => {
-            res.json({ message: "Meetings found.", meetings : result});
+            res.json(result);
         });
     } catch (e) {
         res.status(401).json({ message: 'Invalid meeting search request.', error: e });

@@ -1,10 +1,10 @@
 class Room {
-    constructor(id, number, description, capacity, hourlyRate) {
+    constructor(id, number, description, capacity, isPremium) {
         this.id = id;
         this.number = number;
         this.description = description;
         this.capacity = capacity;
-        this.hourlyRate = hourlyRate ? hourlyRate : 0;
+        this.isPremium = isPremium ? isPremium : false;
         this.meetings = [];
     }
 }
