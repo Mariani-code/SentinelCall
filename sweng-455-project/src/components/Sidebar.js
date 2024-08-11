@@ -54,7 +54,7 @@ export function Sidebar() {
                 <li><Link to="/rooms">Rooms</Link></li>
                 <li><Link to="/complaints">Complaints</Link></li>
                 {showText && <li><Link to="/admin">Admin</Link></li>}
-                <li><Link to="/create-meeting">Create Meeting</Link></li>
+                {!showText && <li><Link to="/create-meeting">Create Meeting</Link></li>}
             </ul>
         </aside>
     );
