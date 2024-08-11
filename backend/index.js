@@ -10,8 +10,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 let users = [
-    { username: 'admin', password: 'admin', email: 'admin@company.xyz' },
-    { username: 'user2', password: 'password2', email: 'user2@company.xyz' }
+    { id: 1, username: 'admin', password: 'admin', email: 'admin@company.xyz' },
+    { id: 2, username: 'user2', password: 'password2', email: 'user2@company.xyz' }
 ];
 
 let userInfo = [
@@ -47,6 +47,48 @@ const isDoubleBooked = (participant, startTime, endTime) => {
         new Date(meeting.time) < endTime
     );
 };
+
+app.post('/makeAdmin', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+
+        if (token === null) {
+            throw new Error();
+        }
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
+
+    }
+    catch (error) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+});
+
+app.post('/suspendAccount', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+
+        if (token === null) {
+            throw new Error();
+        }
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+
+
+    }
+    catch (error) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+});
 
 app.post('/grabAccountInfo', (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
@@ -194,7 +236,7 @@ app.post('/addComplaint', (req, res) => {
         }
 
         const newComplaint = {
-            id: complaintID,
+            id: crypto.UUID(),
             user: decoded.username,
             complaint: complaintString
         };
@@ -218,10 +260,47 @@ app.post('/logout', (req, res) => {
     }
 });
 
+//TODO ACTUALLY UPDATE BILLING INFO
+app.post('/updateAccountBilling', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const { phone, address, country, city, state } = req.body;
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+    }
+});
+
+//TODO ACTUALLY UPDATE ACCOUNT INFO
+app.post('/updateAccountInfo', (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const { firstName, lastName, username, password, email } = req.body;
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+
+        if (decoded.exp * 1000 < Date.now()) {
+            throw new Error();
+        }
+    }
+});
+
+app.post('/makeAdmin', (req, res) => {
+
+});
+
+app.post('/suspendAccount', (req, res) => {
+
+});
+
 app.post('/createAccount', (req, res) => {
     const { username, password, email } = req.body;
 
     const newUser = {
+        id: users.length+1,
         username: username,
         password: password,
         email: email
@@ -266,6 +345,10 @@ app.get('/meetings', (req, res) => {
 
 app.get('/complaints', (req, res) => {
     res.json(complaints);
+});
+
+app.get('/users', (req, res) => {
+    res.json(users);
 });
 
 app.get('/rooms', (req, res) => {
