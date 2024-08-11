@@ -143,14 +143,14 @@ function MyMeetings() {
                     <div className="meetings-list">
                         {meetings.length > 0 ? (
                             meetings.map(meeting => (
-                                <div key={meeting.id} className="meeting-card">
+                                <div key={crypto.randomUUID()} className="meeting-card">
                                     <h3 className="meeting-name">{meeting.name}</h3>
                                     <p className="meeting-time">{new Date(meeting.time).toLocaleString()}</p>
                                     <p className="meeting-room">Room {meeting.room}</p>
                                     {meeting.participants && meeting.participants.length > 0 ? (
                                         <ul className="participants-list">
                                             {meeting.participants.map((participant, index) => (
-                                                <li key={participant}>{participant}</li>
+                                                <li key={crypto.randomUUID()}>{`${participant.firstName} ${participant.lastName}`}</li>
                                             ))}
                                         </ul>
                                     ) : (

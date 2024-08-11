@@ -7,7 +7,6 @@ function PersonalInfo() {
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
@@ -23,11 +22,9 @@ function PersonalInfo() {
             });
             const data = await response.json();
             if (response.ok) {
-                setFirstName(data.userI.firstName);
-                setLastName(data.userI.lastName);
-                setUsername(data.user.username);
-                setPassword(data.user.password);
-                setEmail(data.user.email);
+                setFirstName(data.firstName);
+                setLastName(data.lastName);
+                setEmail(data.email);
             }
             else {
                 setMessage(data.message);
@@ -60,13 +57,6 @@ function PersonalInfo() {
             <input
                 type="text"
                 value={lastName}
-            />
-            <h2>
-                Username
-            </h2>
-            <input
-                type="text"
-                value={username}
             />
             <h2>
                 Password

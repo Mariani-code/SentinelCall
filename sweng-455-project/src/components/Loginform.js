@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-
 import './Loginform.css';
 
 const Loginform = () => {
 
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -15,7 +14,7 @@ const Loginform = () => {
             const response = await fetch('http://localhost:1000/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ email, password })
             });
             const data = await response.json();
             if (response.ok) {
@@ -33,9 +32,9 @@ const Loginform = () => {
         <div className="login-form">
             <input
                 type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Company Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
             />
             <input
                 type="password"

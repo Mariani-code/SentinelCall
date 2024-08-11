@@ -4,10 +4,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { initializeApp } = require('firebase/app');
 const { collection, query, where, addDoc, getDoc, getDocs, getFirestore, connectFirestoreEmulator, writeBatch, Timestamp } = require('firebase/firestore');
-const { getAuth, connectAuthEmulator, signInWithEmailAndPassword } = require('firebase/auth');
 const { Meeting } = require('./meeting');
 const { User } = require('./user');
 const { Room } = require('./room');
+const { Complaint } = require('./complaint');
 const { firebaseConfig } = require('./firebaseConfig');
 
 const app = express();
@@ -18,8 +18,6 @@ app.use(cors());
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
-connectAuthEmulator(auth, 'http://localhost:9099');
 
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(firebaseApp);
@@ -61,6 +59,16 @@ let seedRoomInfo = [
 let meetings = [
     { id: 1, name: 'Team Meeting', time: new Date('2024-07-30T10:00:00'), room: '101', participants: ['user2'] },
     { id: 2, name: 'Project Review', time: new Date('2024-07-30T14:00:00'), room: '102', participants: ['admin'] }
+];
+
+let seedComplaints = [
+    new Complaint("Room 105 does not exist in the system"),
+    new Complaint("My account should be an admin account"),
+]
+
+let complaints = [
+    { id: 1, user: 'user2', complaint: 'Room 105 does not exist in the system' },
+    { id: 2, user: 'user4', complaint: 'My account should be an admin account' }
 ];
 
 // Fills target database (local or remote) with base user data. (Not log-in)
@@ -155,16 +163,34 @@ app.get('/meetingSeed', async (req, res) => {
     res.send({ "Meetings Added" : ids.length});
 })
 
+app.get('/complaintsSeed', async (req, res) => {
+    var ids = [];
+    // 1. Get a user reference
+    for (complaint of seedComplaints) {
+        const { id, text, isOpen } = complaint;
+        try {
+            const docRef = await addDoc(collection(db, "complaints"), {
+                id,
+                text,
+                isOpen,
+            });
+            console.log("Document written with ID: ", docRef.id);
+            ids.push(docRef.id);
+        } catch (e) {
+            // TODO: Handle this on front-end as well.
+            console.error("Error adding document: ", e);
+        }
+    }
+    console.log('Complaints seeded with IDs: ', ids)
+    res.send({ "Complaints Added" : ids.length});
+})
+
 /* 
 TODO: Any administrative actions that delete references need to be done
 "cleanly". If a room is deleted, the meetings associated with it need to be
 deleted as well, for example. Same goes for users that are no longer in the DB
 but may still be in a meeting.
 */
-let complaints = [
-    { id: 1, user: 'user2', complaint: 'Room 105 does not exist in the system' },
-    { id: 2, user: 'user4', complaint: 'My account should be an admin account' }
-];
 
 const isDoubleBooked = (participant, startTime, endTime) => {
     return meetings.some(meeting =>
@@ -174,7 +200,7 @@ const isDoubleBooked = (participant, startTime, endTime) => {
     );
 };
 
-app.post('/grabAccountInfo', (req, res) => {
+app.post('/grabAccountInfo', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
 
     if (token === null) {
@@ -183,10 +209,27 @@ app.post('/grabAccountInfo', (req, res) => {
 
     const decode = jwt.verify(token, 'your_jwt_secret');
 
-    const user = users.find(obj => obj.username === decode.username);
-    const userI = userInfo.find(obj => obj.username === decode.username);
-
-    return res.status(200).json({ user, userI });
+    // From the token in request header, extract the ID.
+    const id = decode.id;
+    // 1. Use ID to find matching document in users collection:
+    
+    const userCollection = collection(db, "users");
+    const userQuery = query(userCollection,
+        where("id", "==", id)
+    );
+    try {
+        var firstName, lastName, email;
+        var userSnapshot = await getDocs(userQuery);
+        userSnapshot.forEach(async (user) => {
+            console.log(user.id, " => ", user.data());
+            firstName = user.data().firstName;
+            lastName = user.data().lastName;
+            email = user.data().email;
+        });
+        res.status(200).json({firstName, lastName, email})
+    } catch (e) {
+        res.status(400).json({ message: "Error retrieving user profile data."})
+    }
 });
 
 app.post('/rooms', async (req, res) => {
@@ -226,38 +269,6 @@ app.post('/grabBillingInfo', (req, res) => {
 
     return res.status(200).json({ user });
 });
-
-
-// app.post('/rooms', (req, res) => {
-//     const { number, description, capacity } = req.body;
-//     const newRoom = {
-//         id: rooms.length + 1,
-//         number,
-//         description,
-//         capacity
-//     };
-
-//     rooms.push(newRoom);
-//     res.status(201).json(newRoom);
-// });
-
-// app.post('/meetings', (req, res) => {
-//     const { name, time, room, participants } = req.body;
-//     const startTime = new Date(time);
-//     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-
-//     // Check if any participant is double-booked
-//     const doubleBooked = participants.some(participant => isDoubleBooked(participant, startTime, endTime));
-
-//     if (doubleBooked) {
-//         return res.status(400).json({ message: 'One or more participants are double-booked.' });
-//     }
-
-//     // TODO: Decide what should be returned here. This end-point could be specific for updating,
-//     // and the client can just make sure it refreshes after posting.
-//     // rooms.push(newRoom);
-//     // res.status(201).json(newRoom);
-// });
 
 app.post('/test', async (req, res) => {
     try {
@@ -345,27 +356,48 @@ app.post('/meetings', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-    console.log("Incoming user/pass: " ,username, password);
+    const { email, password } = req.body;
+    console.log("Incoming user/pass: " ,email, password);
     // Dummy authentication check
     // const user = users.find(user => user.username === username && user.password === password);
+    // TODO: Provide some form of regex check here, or other sanitization, before querying.
+    // 1. Check loginCredentials collection for an entry matching the password and email exactly:
+    // TODO: Handle failure here (no matches found)
+    const loginCredCollection = collection(db, "loginCredentials");
+    const loginCredQuery = query(loginCredCollection, 
+        where("email", "==", email ),
+        where("password", "==", password)
+    );
 
-    // if (user) {
-    //     // Generate a token or send a success response
-    //     const token = jwt.sign({ username }, 'your_jwt_secret', { expiresIn: '1h' });
-    //     res.json({ token });
-    // } else {
-    //     res.status(401).json({ message: 'Invalid username or password' });
-    // }
-
+    // Need to wrap queries in a try to ensure errors are caught and proper
+    // responses can be sent.
     try {
-        const userCredentials = await signInWithEmailAndPassword(auth, username, password);
-        console.log(userCredentials.user);
-        res.status(200).json({ message: 'Log-in Successful',
-            'user': userCredentials.user
-        });
-    } catch (error) {
-        res.status(401).json({ message: 'Invalid username or password' });
+        var loginCredentialsSnapshot = await getDocs(loginCredQuery);
+        var userReference;
+        loginCredentialsSnapshot.forEach(async (doc) => {
+            console.log(doc.id, " => ", doc.data());
+            userReference = doc.data().userRef;
+        })
+        // // 2. Get user document from users collection
+        const usersCollection = collection(db, "users");
+        const userSnapshot = await getDoc(userReference);
+    
+        const { firstName, lastName, id, isAdmin} = userSnapshot.data();
+        const retrievedEmail = userSnapshot.data().email // different var name due to name collision
+    
+        // Generate a token or send a success response
+        const token = jwt.sign({
+            email: retrievedEmail, 
+            firstName, 
+            lastName, 
+            id, 
+            isAdmin 
+        },
+        'your_jwt_secret', 
+        { expiresIn: '1h' });
+        res.json({ token });
+    } catch (e) {
+        res.status(401).json({ message: 'Invalid email or password' });
     }
 });
 
@@ -375,9 +407,10 @@ app.post('/login', async (req, res) => {
     Client - Create meeting, create complaint, veiw meetings
 */
 app.post('/checkRole', (req, res) => {
+    console.log('Incoming token: ')
     try {
         const token = req.headers.authorization.split(' ')[1];
-
+        console.log("Token: ", token);
         if (token === null) {
             throw new Error();
         }
@@ -388,7 +421,7 @@ app.post('/checkRole', (req, res) => {
             throw new Error();
         }
 
-        if (decoded.username == "admin") {
+        if (decoded.isAdmin) {
             return res.status(200).json();
         }
         else {
@@ -457,17 +490,33 @@ app.post('/logout', (req, res) => {
     }
 });
 
-app.post('/createAccount', (req, res) => {
-    const { username, password, email } = req.body;
+app.post('/createAccount', async (req, res) => {
+    // TODO: Check that account doesn't already exist.
+    // 1. Create entry into users collection with user info.
+    // 2. Create entry into loginCredentials collection, and create reference to prior user document.
 
-    const newUser = {
-        username: username,
-        password: password,
-        email: email
-    };
+    const { firstName, lastName, password, email } = req.body;
 
-    users.push(newUser);
-    res.status(201).json({ message: 'Account created successfully' });
+    try {
+        const userRef = await addDoc(collection(db, "users"), {
+            firstName,
+            lastName,
+            email,
+            id: crypto.randomUUID(), // assign random ID for user document
+        });
+        console.log("New user added with ID: ", userRef.id);
+
+        const loginCredRef = await addDoc(collection(db, "loginCredentials"), {
+            userRef,
+            password,
+            email,
+            isAdmin: false,
+        });
+        res.status(201).json({ message: 'Account created successfully' });
+        
+    } catch (e) {
+        res.status(401).json({ message: 'Error creating account. Please contact administrator.' });
+    }
 });
 
 app.put('/meetings/:id', (req, res) => {
@@ -546,26 +595,12 @@ app.get('/rooms', async (req, res) => {
         // admin only, since this may reveal more than needed to a user.
     });
 
-    // const updatedRooms = rooms.map(room => ({
-    //     ...room,
-    //     meetings: meetings.filter(meeting => meeting.room === room.number)
-    // }));
-    // res.json(updatedRooms);
     res.json(retrievedRooms);
 });
 
 app.get('/complaints', (req, res) => {
     res.json(complaints);
 });
-
-// app.get('/rooms', (req, res) => {
-//     const updatedRooms = rooms.map(room => ({
-//         ...room,
-//         meetings: meetings.filter(meeting => meeting.room === room.number)
-//     }));
-//     res.json(updatedRooms);
-// >>>>>>> master
-// });
 
 app.get('/', (req, res) => {
     res.send('Your server is running');

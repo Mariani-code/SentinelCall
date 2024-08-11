@@ -4,7 +4,9 @@ import './Registerform.css';
 
 const Registerform = () => {
     const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
+    // const [username, setUsername] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
     const [passwordCopy, setPasswordCopy] = useState('');
     const [message, setMessage] = useState('');
@@ -59,11 +61,6 @@ const Registerform = () => {
             return;
         }
 
-        if (!hasNoSpaces(username)) {
-            setMessage('Username cannot contain spaces');
-            return;
-        }
-
         if (!validatePassword(password, passwordCopy)) {
             return;
         }
@@ -74,7 +71,7 @@ const Registerform = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password, email })
+                body: JSON.stringify({ firstName, lastName, email, password})
             });
             const data = await response.json();
             if (response.ok) {
@@ -96,9 +93,15 @@ const Registerform = () => {
             />
             <input
                 type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
             />
             <input
                 type="password"
