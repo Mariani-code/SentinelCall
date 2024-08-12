@@ -13,11 +13,12 @@ function Admin() {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:1000/users', {
+            const response = await fetch('http://localhost:1000/users_api/allWithRole', {
                 method: 'GET',
             });
             const data = await response.json();
             if (response.ok) {
+                console.log(data);
                 setUsers(data);
             } else {
                 setError('Failed to fetch complaints');
@@ -27,40 +28,46 @@ function Admin() {
         }
     }
 
-    const handleMakeAdmin = async (id) => {
+    const handlePrivilegeChange = async (email, isAdmin) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:1000/makeAdmin', {
-                method: 'POST',
+            const response = await fetch('http://localhost:1000/users_api/updatePrivileges', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': `application/json`,
                     'Authorization': `Bearer: ${token}`
                 },
-                body: { id }
+                body: JSON.stringify({ email, isAdmin })
             });
-            const data = await response.json();
+            // const data = await response.json();
+            if (response.ok) {
+                fetchUsers();
+            }
             if (!response.ok) {
-                throw new Error(data.message);
+                // throw new Error(data.message);
             }
         } catch (err) {
             setError('Error: ' + err.message);
         }
     }
 
-    const handleSuspend = async (id) => {
+    const handleSuspend = async (email, id) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:1000/suspendAccount', {
-                method: 'POST',
+            const response = await fetch('http://localhost:1000/users_api/suspendUser', {
+                method: 'DELETE',
                 headers: {
                     'Content-Type': `application/json`,
                     'Authorization': `Bearer: ${token}`
                 },
-                body: { id }
+                body: JSON.stringify({ email, id })
             });
-            const data = await response.json();
+            // const data = await response.json();
+            if (response.ok) {
+                fetchUsers();
+            }
             if (!response.ok) {
-                throw new Error(data.message);
+                // throw new Error(data.message);
             }
         } catch (err) {
             setError('Error: ' + err.message);
@@ -83,11 +90,26 @@ function Admin() {
                         {users.length > 0 ? (
                             users.map(user => (
                                 <div key={user.id} className="users-card">
-                                    <h3 className="users-name">User: {user.username}</h3>
-                                    <button onClick={() => handleMakeAdmin(user.id)} className="manage-users-button add-participants-button">
+                                    <h3 className="users-name">User: {user.firstName} {user.lastName}</h3>
+                                    <h2 className="users-name">{user.email}</h2>
+                                    {
+                                        user.isAdmin ?
+                                        (
+                                            <button onClick={() => handlePrivilegeChange(user.email, false)} className="manage-users-button add-participants-button">
+                                            Remove Admin Access
+                                            </button>
+                                        )
+                                        :
+                                        (
+                                            <button onClick={() => handlePrivilegeChange(user.email, true)} className="manage-users-button add-participants-button">
+                                            Grant Admin Access
+                                            </button>
+                                        )
+                                    }
+                                    {/* <button onClick={() => handleMakeAdmin(user.id)} className="manage-users-button add-participants-button">
                                         Add/Remove Admin
-                                    </button>
-                                    <button onClick={() => handleSuspend(user.id)} className="manage-users-button remove-participants-button">
+                                    </button> */}
+                                    <button onClick={() => handleSuspend(user.email, user.id)} className="manage-users-button remove-participants-button">
                                         Suspend
                                     </button>
                                 </div>

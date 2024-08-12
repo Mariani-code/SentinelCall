@@ -7,7 +7,6 @@ function PersonalInfo() {
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [passwordCopy, setPasswordCopy] = useState('');
     const [email, setEmail] = useState('');
@@ -20,7 +19,7 @@ function PersonalInfo() {
     */
     const [updatedFirst, setUpFirst] = useState('');
     const [updatedLast, setUpLast] = useState('');
-    const [updatedUser, setUpUser] = useState('');
+    // const [updatedUser, setUpUser] = useState('');
     const [updatedPass, setUpPass] = useState('');
     const [updatedEmail, setUpEmail] = useState('');
 
@@ -69,17 +68,20 @@ function PersonalInfo() {
             });
             const data = await response.json();
             if (response.ok) {
-                setFirstName(data.userI.firstName);
-                setLastName(data.userI.lastName);
-                setUsername(data.user.username);
-                setPassword(data.user.password);
-                setEmail(data.user.email);
+                setFirstName(data.firstName);
+                setLastName(data.lastName);
+                setEmail(data.email);
+                // setFirstName(data.userI.firstName);
+                // setLastName(data.userI.lastName);
+                // setUsername(data.user.username);
+                // setPassword(data.user.password);
+                // setEmail(data.user.email);
 
-                setUpFirst(data.userI.firstName);
-                setUpLast(data.userI.lastName);
-                setUpUser(data.user.username);
-                setUpPass(data.user.password);
-                setUpEmail(data.user.email);
+                // setUpFirst(data.userI.firstName);
+                // setUpLast(data.userI.lastName);
+                // setUpUser(data.user.username);
+                // setUpPass(data.user.password);
+                // setUpEmail(data.user.email);
             }
             else {
                 setMessage(data.message);
@@ -103,11 +105,11 @@ function PersonalInfo() {
                 }
             }
 
-            if (updatedUser !== username) {
-                if (!hasNoSpaces(username)) {
-                    throw new Error('Username must contain no spaces');
-                }
-            }
+            // if (updatedUser !== username) {
+            //     if (!hasNoSpaces(username)) {
+            //         throw new Error('Username must contain no spaces');
+            //     }
+            // }
 
             if (updatedEmail !== email) {
                 if (!validateEmail(email)) {
@@ -126,7 +128,7 @@ function PersonalInfo() {
                     'Content-type': `application/json`,
                     'Authorization': `Bearer: ${token}`
                 },
-                body: JSON.stringify({ firstName, lastName, username, password, email })
+                body: JSON.stringify({ firstName, lastName, password, email })
             });
             const data = await response.json();
             if (!response.ok) {
@@ -165,14 +167,6 @@ function PersonalInfo() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-            />
-            <h2>
-                Username
-            </h2>
-            <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
             />
             <h2>
                 Password

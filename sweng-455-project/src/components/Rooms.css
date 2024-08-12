@@ -117,3 +117,7 @@
         .add-room button:active {
             background-color: #007AFF;
         }
+
+.room-isPremium {
+    font-weight: bold;
+}
