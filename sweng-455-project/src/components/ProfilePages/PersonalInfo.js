@@ -19,7 +19,7 @@ function PersonalInfo() {
     */
     const [updatedFirst, setUpFirst] = useState('');
     const [updatedLast, setUpLast] = useState('');
-    const [updatedUser, setUpUser] = useState('');
+    // const [updatedUser, setUpUser] = useState('');
     const [updatedPass, setUpPass] = useState('');
     const [updatedEmail, setUpEmail] = useState('');
 
@@ -75,13 +75,13 @@ function PersonalInfo() {
                 // setLastName(data.userI.lastName);
                 // setUsername(data.user.username);
                 // setPassword(data.user.password);
-                setEmail(data.user.email);
+                // setEmail(data.user.email);
 
-                setUpFirst(data.userI.firstName);
-                setUpLast(data.userI.lastName);
+                // setUpFirst(data.userI.firstName);
+                // setUpLast(data.userI.lastName);
                 // setUpUser(data.user.username);
                 // setUpPass(data.user.password);
-                setUpEmail(data.user.email);
+                // setUpEmail(data.user.email);
             }
             else {
                 setMessage(data.message);
@@ -105,11 +105,11 @@ function PersonalInfo() {
                 }
             }
 
-            if (updatedUser !== username) {
-                if (!hasNoSpaces(username)) {
-                    throw new Error('Username must contain no spaces');
-                }
-            }
+            // if (updatedUser !== username) {
+            //     if (!hasNoSpaces(username)) {
+            //         throw new Error('Username must contain no spaces');
+            //     }
+            // }
 
             if (updatedEmail !== email) {
                 if (!validateEmail(email)) {
@@ -128,7 +128,7 @@ function PersonalInfo() {
                     'Content-type': `application/json`,
                     'Authorization': `Bearer: ${token}`
                 },
-                body: JSON.stringify({ firstName, lastName, username, password, email })
+                body: JSON.stringify({ firstName, lastName, password, email })
             });
             const data = await response.json();
             if (!response.ok) {

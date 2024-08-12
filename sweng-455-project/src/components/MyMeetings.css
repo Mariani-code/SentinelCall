@@ -85,3 +85,8 @@
   font-size: 16px;
   color: #666;
 }
+
+.highlight {
+  border-color: grey;
+  border-width: 2px;
+}

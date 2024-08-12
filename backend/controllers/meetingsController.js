@@ -5,8 +5,20 @@ const { User } = require('../user');
 const { Meeting } = require('../meeting');
 const jwt = require('jsonwebtoken');
 
+var { testUsers } = require('../mockDatabase/usersCollection');
+var { testMeetings } = require('../mockDatabase/meetingsCollection');
+const useTestValues = true;
+
 const weekInSeconds = 7 * 24 * 60 * 60;
 const dayInSeconds = 24 * 60 * 60;
+
+// 8 - 18 - 2024 @ 10AM:
+const sunday = 1724000400;
+const monday = sunday + dayInSeconds;
+const tuesday = monday + dayInSeconds;
+const wednesday = tuesday + dayInSeconds;
+const thursday = wednesday + dayInSeconds;
+const friday = thursday + dayInSeconds;
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
@@ -45,52 +57,78 @@ exports.createMeeting = async (req, res) => {
 
     console.log(req.body)
 
-    // TODO: Verify the room chosen exists, and get its document ID.
-
-    const startTime = time ? new Date(time) : new Date();
-        
-    // Insertion with reference is possible, but not very clear from documentation.
-    // Perform query to match desired item.
-    // using the doc object in the forEach, grab the doc.ref value, store in array.
-
-    const roomsCollection = collection(db, "rooms");
-    // TODO: Change the query to check for equality on the unique room ID.
-    const roomQuery = query(roomsCollection, where("id", "==", room));
-    const roomSnapshot = await getDocs(roomQuery);
-    // Should only return one room:
-    var roomReference;
-    roomSnapshot.forEach(async (doc) => {
-        console.log(doc.id, " => ", doc.data());
-        roomReference = doc.ref;
-    });
-
-    var allUserReferences = [];
-    for (participant of participants) {
-        // console.log(`Have ${participant}, looking for ${participant.email}`);
-        const usersCollection = collection(db, "users");
-        const userQuery = query(usersCollection, where("id", "==", participant));
-        const userSnapshot = await getDocs(userQuery);
-        userSnapshot.forEach(async (doc) => {
-            console.log(doc.id, " => ", doc.data());
-            allUserReferences.push(doc.ref);
-        })
-    }
-
-    try {
-        const docRef = await addDoc(collection(db, "meetings"), {
-            id: crypto.randomUUID(),
+    if (useTestValues) {
+        // find all participants:
+        var matchedUsers = [];
+        for (user of testUsers) {
+            for (participant of participants) {
+                if (user.id == participant) {
+                    matchedUsers.push(user)
+                }
+            }
+        }
+        // Instantiate meeting, insert into array.
+        var newMeeting = new Meeting(
             name,
-            time: startTime,
-            room: roomReference,
-            participants: allUserReferences,
+            room,
+            time,
+            matchedUsers,
             ownerID,
+            crypto.randomUUID()
+        );
+
+        testMeetings.push(newMeeting);
+        console.log(testMeetings);
+        res.json(testMeetings);
+    } else {
+        // TODO: Verify the room chosen exists, and get its document ID.
+    
+        const startTime = time ? new Date(time) : new Date();
+            
+        // Insertion with reference is possible, but not very clear from documentation.
+        // Perform query to match desired item.
+        // using the doc object in the forEach, grab the doc.ref value, store in array.
+    
+        const roomsCollection = collection(db, "rooms");
+        // TODO: Change the query to check for equality on the unique room ID.
+        const roomQuery = query(roomsCollection, where("id", "==", room));
+        const roomSnapshot = await getDocs(roomQuery);
+        // Should only return one room:
+        var roomReference;
+        roomSnapshot.forEach(async (doc) => {
+            console.log(doc.id, " => ", doc.data());
+            roomReference = doc.ref;
         });
-        console.log("Document written with ID: ", docRef.id);
-        res.json({"message" : "Meeting created"});
-    } catch (e) {
-        // TODO: Handle this on front-end as well.
-        console.error("Error adding document: ", e);
-        res.status(400);
+    
+        var allUserReferences = [];
+        for (participant of participants) {
+            // console.log(`Have ${participant}, looking for ${participant.email}`);
+            const usersCollection = collection(db, "users");
+            const userQuery = query(usersCollection, where("id", "==", participant));
+            const userSnapshot = await getDocs(userQuery);
+            userSnapshot.forEach(async (doc) => {
+                console.log(doc.id, " => ", doc.data());
+                allUserReferences.push(doc.ref);
+            })
+        }
+    
+        try {
+            const docRef = await addDoc(collection(db, "meetings"), {
+                id: crypto.randomUUID(),
+                name,
+                time: startTime,
+                room: roomReference,
+                participants: allUserReferences,
+                ownerID,
+            });
+            console.log("Document written with ID: ", docRef.id);
+            res.json({"message" : "Meeting created"});
+        } catch (e) {
+            // TODO: Handle this on front-end as well.
+            console.error("Error adding document: ", e);
+            res.status(400);
+        }
+
     }
 };
 
@@ -227,29 +265,43 @@ Gets meeting with:
 */
 exports.getMeetingsByOwner = async (req, res) => {
     // get meetings created by a specific user.
-
-    const token = req.headers.authorization.split(' ')[1];
-    if (token === null) {
-        return res.status(400).json({ message: 'Please login to view account information' });
-    }
-
-    const decode = jwt.verify(token, 'your_jwt_secret');
-    const ownerID = decode.id
-
-    const meetingCollection = collection(db, "meetings");
-    const meetingQuery = query(meetingCollection,
-        where("ownerID", "==", ownerID),
-    );
-    console.log("Searching for User: ", ownerID);
+    var ownerID;
     try {
-        const meetingSnapshot = await getDocs(meetingQuery);
-        await meetingRoomAndParticipantPromises(meetingSnapshot)
-        .then((result) => {
-            res.json(result);
-        });
+        const token = req.headers.authorization.split(' ')[1];
+        if (token === null) {
+         
+            return res.status(400).json({ message: 'Please login to view account information' });
+        }
+        const decode = jwt.verify(token, 'your_jwt_secret');
+        ownerID = decode.id
     } catch (e) {
-        res.status(401).json({ message: 'Invalid meeting search request.', error: e });
+        res.sendStatus(401);
+        return;
     }
+    
+    if (useTestValues) {
+        testMeetings = testMeetings.filter(meeting => {
+            return meeting.owner == ownerID
+        })
+        res.json(testMeetings);
+    }
+    else {
+        const meetingCollection = collection(db, "meetings");
+        const meetingQuery = query(meetingCollection,
+            where("ownerID", "==", ownerID),
+        );
+        console.log("Searching for User: ", ownerID);
+        try {
+            const meetingSnapshot = await getDocs(meetingQuery);
+            await meetingRoomAndParticipantPromises(meetingSnapshot)
+            .then((result) => {
+                res.json(result);
+            });
+        } catch (e) {
+            res.status(401).json({ message: 'Invalid meeting search request.', error: e });
+        }
+    }
+
 };
 
 exports.getMeetingsByParticipant = async (req, res) => {
@@ -293,47 +345,76 @@ exports.getMeetingsByParticipant = async (req, res) => {
 exports.updateParticipants = async (req, res) => {
     // Extract list of desired participants in request, obtain references.
     // Update (override) participants array with new references.
-    const { participants, meetingID } = req.body; // (Array)
+    const { participants, meetingID, meetingId, participantsToAdd, participantsToRemove } = req.body; // (Array)
 
-    var userReferences = [];
-
-    // Get user references:
-    const usersCollection = collection(db, "users");
-
-    for (participant of participants) {
+    if (useTestValues) {
+        if (participantsToAdd.length > 0) {
+            // add to meeting
+        }
+        if (participantsToRemove.length > 0) {
+            // find meeting in table
+            // filter participants based on the removal array.
+            var filteredParticipants;
+            var targetMeeting;
+            for (meeting of testMeetings) {
+                if (meeting.id == meetingId) {
+                    targetMeeting = structuredClone(meeting);
+                }
+            }
+            console.log('Target Meeting', targetMeeting);
+            for (userToRemove of participantsToRemove) {
+                console.log('Backend - Attempting to remove user: ', userToRemove);
+                filteredParticipants = targetMeeting.participants.filter(participant => participant.id != userToRemove)
+            }
+            for (meeting of testMeetings) {
+                if (meeting.id == meetingId) {
+                    meeting.participants = filteredParticipants;
+                    res.json(meeting);
+                }
+            }
+        }
+    } else {
+        var userReferences = [];
+    
+        // Get user references:
+        const usersCollection = collection(db, "users");
+    
+        for (participant of participants) {
+            try {
+                console.log(`Looking for ${participant.id}`);
+                const userQuery = query(usersCollection,
+                    where("id", "==", participant.id),
+                );
+                const userSnapshot = await getDocs(userQuery);
+                userSnapshot.forEach((user) => {
+                    userReferences.push(user.ref);
+                })
+    
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    
+        // Find specific meeting
+        var meetingRef;
+        const meetingsCollection = collection(db, "meetings");
+        const meetingQuery = query(meetingsCollection,
+            where("id", "==", meetingID)
+        );
         try {
-            console.log(`Looking for ${participant.id}`);
-            const userQuery = query(usersCollection,
-                where("id", "==", participant.id),
-            );
-            const userSnapshot = await getDocs(userQuery);
-            userSnapshot.forEach((user) => {
-                userReferences.push(user.ref);
+            const meetingSnapshot = await getDocs(meetingQuery);
+            meetingSnapshot.forEach((meeting) => {
+                meetingRef = meeting.ref;
             })
-
+            await updateDoc(meetingRef, {
+                "participants": userReferences,
+            });
+            res.send({"message": "Meeting updated"})
         } catch (e) {
-            console.log(e);
+            res.send(400).json({"eror" : e})
         }
     }
 
-    // Find specific meeting
-    var meetingRef;
-    const meetingsCollection = collection(db, "meetings");
-    const meetingQuery = query(meetingsCollection,
-        where("id", "==", meetingID)
-    );
-    try {
-        const meetingSnapshot = await getDocs(meetingQuery);
-        meetingSnapshot.forEach((meeting) => {
-            meetingRef = meeting.ref;
-        })
-        await updateDoc(meetingRef, {
-            "participants": userReferences,
-        });
-        res.send({"message": "Meeting updated"})
-    } catch (e) {
-        res.send(400).json({"eror" : e})
-    }
 }
 
 async function meetingRoomAndParticipantPromises(meetingSnapshot) {
